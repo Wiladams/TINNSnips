@@ -1,3 +1,17 @@
+--[[
+	Description: A very simple demonstration of one way a static web server
+	can be built using TINN.
+
+	In this case, the WebApp object is being used.  It is handed a routine to be
+	run for every http request that comes in (HandleSingleRequest()).
+
+	Either a file is fetched, or an error is returned.
+
+	Usage:
+	  tinn staticserver.lua 8080
+
+	default port used is 8080
+]]
 
 local WebApp = require("WebApp")
 
@@ -8,29 +22,16 @@ local URL = require("url");
 local StaticService = require("StaticService");
 
 
-local contentTemplate = [[
-<html>
-	<head><title>This is the title</title></head>
-	<body>
-		Hello, World!
-	</body>
-</html>
-]]
-
-
 
 local HandleSingleRequest = function(stream, pendingqueue)
 	local request, err  = HttpRequest.Parse(stream);
 
 	if not request then
-		-- dump the stream
-		--print("HandleSingleRequest, Dump stream: ", err)
+		print("HandleSingleRequest, Dump stream: ", err)
 		return 
 	end
 
 	local urlparts = URL.parse(request.Resource)
-	
---	print(urlparts.scheme, urlparts.path)
 	
 
 	if urlparts.path == "/ping" then
@@ -40,7 +41,6 @@ local HandleSingleRequest = function(stream, pendingqueue)
 		response:writeEnd();
 	else
 		local filename = './wwwroot'..urlparts.path;
---		print("FILE: ", filename);
 	
 		local response = HttpResponse.Open(stream);
 
