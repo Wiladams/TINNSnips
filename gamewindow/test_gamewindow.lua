@@ -5,7 +5,7 @@ package.path = package.path..";../../Bhut/?.lua;";
 local ffi = require "ffi"
 
 local GameWindow = require "GameWindow"
-local GDI32 = require "Gdi32"
+local GDI32 = require "GDI32"
 local StopWatch = require "StopWatch"
 
 -- The routine that gets called for any

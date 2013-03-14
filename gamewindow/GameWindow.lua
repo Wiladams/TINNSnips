@@ -10,7 +10,7 @@ local bor = bit.bor
 
 --local gl = require "gl"
 
-local Gdi32 = require "Gdi32"
+local Gdi32 = require "GDI32"
 local User32 = require "User32"
 local Kernel32 = require "win_kernel32"
 
