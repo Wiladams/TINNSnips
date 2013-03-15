@@ -1,5 +1,3 @@
--- Put this at the top of any test
-package.path = package.path..";../../Bhut/?.lua;";
 
 
 local ffi = require "ffi"
