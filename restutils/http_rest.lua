@@ -64,7 +64,7 @@ print("http_get: ", resource, showheaders, onfinish)
 		for chunk, err in chunkiter.ReadChunks(response) do
 			-- do nothing
 			-- but read the chunks
-			--io.write(chunk);
+			io.write(chunk);
 		end
 		result = "OK";
 	else
