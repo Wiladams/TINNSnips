@@ -41,6 +41,6 @@ local Connect = function(url, onconnected)
 end
 
 
-sched:Spawn(Connect, "ws://localhost:6437/", onconnected)
+sched:Spawn(Connect, "ws://192.168.1.34:6437", onconnected)
 
 sched:Start();

@@ -231,6 +231,11 @@ local handleUIOSocketData = function(ws)
 end
 
 local handleUIOSocket = function(request, response)
+print("METHOD: ", request.Method);
+for k,v in pairs(request.Headers) do
+  print(k,v);
+end
+
   local ws = WebSocketStream();
   ws:RespondWithServerHandshake(request, response);
 

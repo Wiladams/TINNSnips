@@ -26,6 +26,12 @@ BitBang = require("BitBang");
 
 local webSocketGUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
+--[[
+CONNECTING = 0;
+OPEN = 1;
+CLOSING = 2;
+CLOSED = 3;
+--]]
 
 WebSocketStream_t = {}
 WebSocketStream_mt = {
@@ -51,7 +57,7 @@ WebSocketStream_t.InitiateClientHandshake = function(self, host, port)
 
 	-- Construct the initial handshake request
 	if port ~= 80 then
-		--host = host..':'..port
+		host = host..':'..port
 	end
 
 	local rngBuff, err = BCrypt.GetRandomBytes(16)
@@ -61,16 +67,17 @@ WebSocketStream_t.InitiateClientHandshake = function(self, host, port)
 	local nonce = b64.encode(rngBuff, 16);
 
 	local headers = {
-		["Host"] 				= host,
-		["Upgrade"]				= "websocket",
-		["Connection"]			= "Upgrade",
-		["Origin"]				= "localhost",
-		["Sec-WebSocket-Key"]	= nonce,
+		["User-Agent"]				= "TINN",
+		["Host"] 					= "localhost",
+		["Upgrade"]					= "websocket",
+		["Connection"]				= "Upgrade",
+--		["Origin"]					= "http://localhost:6437",
+		["Sec-WebSocket-Key"]		= nonce,
+--		["Sec-WebSocket-Protocol"]	= "chat, superchat",
 		["Sec-WebSocket-Version"]	= "13",
-
 	};
 	local body = nil;
-	local request = HttpRequest.new("GET", "/", headers, body);
+	local request = HttpRequest.new("GET", "", headers, body);
 
 	request:Send(stream);
 
