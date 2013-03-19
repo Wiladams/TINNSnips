@@ -1,25 +1,17 @@
 
-local Scheduler = require("EventScheduler");
+local Runtime = require("Runtime")
 local REST = require("http_rest");
 
-
-
-local GET = function(url, showheaders)
-	showheaders = showheaders or false
-
-	local sched = Scheduler();
-	Runtime={}
-	Runtime.Scheduler = sched;
+local main = function()
+	local url = arg[1];
+	local showheaders = arg[2] or false;
 
 	onfinish = function(result)
-		--print("\nonfinish RESULT: ", result)
-		sched:Stop();
+		stop();
 	end
 
-	sched:Spawn(REST.GET, url, showheaders, onfinish);
-
-	sched:Start();
+	spawn(REST.GET, url, showheaders, onfinish);
 end
 
-GET(arg[1], arg[2]);
+run(main);
 

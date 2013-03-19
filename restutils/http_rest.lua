@@ -15,7 +15,7 @@ local sout = FileStream.new(io.stdout)
 
 
 local http_get = function(resource, showheaders, onfinish)
-print("http_get: ", resource, showheaders, onfinish)
+--print("http_get: ", resource, showheaders, onfinish)
 	if not resource then
 		return onfinish(nil, "no resource specified");
 	end
@@ -68,7 +68,7 @@ print("http_get: ", resource, showheaders, onfinish)
 		end
 		result = "OK";
 	else
-		result = "FAILURE:"..tostring(err);
+		result = err;
 	end
 	
 	return onfinish(result);
