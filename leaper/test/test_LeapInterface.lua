@@ -1,11 +1,9 @@
-local ffi = require("ffi");
-local LeapInterface = require("LeapInterface");
---local WebSocketStream = require("WebSocketStream");
-local Scheduler = require("EventScheduler");
 
-local sched = Scheduler();
-Runtime={}
-Runtime.Scheduler = sched;
+local Runtime = require("Runtime");
+
+local ffi = require("ffi");
+local LeapInterface = require("Leap.LeapInterface");
+local Scheduler = require("EventScheduler");
 
 local leap, err = LeapInterface();
 
@@ -48,6 +46,9 @@ local readFrames = function(leap)
 	end
 end
 
-sched:Spawn(readRawFrames, leap);
---sched:Spawn(readFrames, leap);
-sched:Start();
+local main = function()
+	spawn(readRawFrames, leap);
+	--sched:Spawn(readFrames, leap);
+end
+
+run(main);

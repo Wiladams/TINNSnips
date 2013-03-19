@@ -1,7 +1,7 @@
 
 local Runtime = require("Runtime");
-local LeapScape = require ("LeapScape");
-local GestureHandler = require("GestureHandler");
+local LeapScape = require ("Leap.LeapScape");
+local GestureHandler = require("Leap.GestureHandler");
 
 
 local printDict = function(dict)

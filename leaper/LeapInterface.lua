@@ -1,12 +1,14 @@
 
 local ffi = require("ffi");
+
 local NetStream = require("NetStream");
 local UrlParser = require("url");
 local BCrypt = require ("BCryptUtils");
 local b64 = require("base64");
 local HttpResponse = require("HttpResponse");
-local WebSocketStream = require("WebSocketStream");
 local JSON = require("dkjson");
+
+local WebSocketStream = require("Leap.WebSocketStream");
 
 local tinsert = table.insert
 local format = string.format

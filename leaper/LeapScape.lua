@@ -1,8 +1,8 @@
 
-local ffi = require("ffi")
+local ffi = require("ffi");
 
 local Collections = require("Collections");
-local LeapInterface = require("LeapInterface");
+local LeapInterface = require("Leap.LeapInterface");
 local JSON = require("dkjson");
 
 
@@ -67,33 +67,10 @@ LeapScape_t.ProcessFrames = function(self, frame)
 end
 
 
-LeapScape_t.OnFrame = function(self, frame)
-end
 
 LeapScape_t.OnGesture = function(self, gesture)
 	if self.GestureHandler then
 		self.GestureHandler:OnGesture(gesture);
-	else
-		--print("==== GESTURE ====")
-		--print("type: ", gesture.type, gesture.state);
-
-		if gesture.type == "screenTap" then
-			if self.HandleScreenTap then
-				self:HandleScreenTap(gesture)
-			end
-		elseif gesture.type == "keyTap" then
-			if self.HandleKeyTap then
-				self:HandleKeyTap(gesture)
-			end
-		elseif gesture.type == "swipe" then
-			if self.HandleSwipe then
-				self:HandleSwipe(gesture);
-			end
-		elseif gesture.type == "circle" then
-			if self.HandleCircle then
-				self:HandleCircle(gesture);
-			end
-		end
 	end
 end
 
