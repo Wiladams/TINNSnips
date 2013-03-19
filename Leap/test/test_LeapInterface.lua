@@ -1,3 +1,4 @@
+package.path = package.path.."../../?.lua"
 
 local Runtime = require("Runtime");
 
