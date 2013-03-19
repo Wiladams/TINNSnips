@@ -1,7 +1,14 @@
-package.path = package.path.."../../?.lua"
+package.path = package.path.."../?.lua"
 
-local LeapScape = require ("Leap.LeapScape");
-local GestureHandler = require("Leap.GestureHandler");
+local LeapScape = require ("LeapScape");
+local GestureObserver = require("GestureObserver");
+
+local scape, err = LeapScape();
+
+if not scape then
+	print("Error: ", err)
+	return false
+end
 
 
 local printDict = function(dict)
@@ -67,26 +74,22 @@ end
 
 
 local main = function()
-	local scape = LeapScape();
-	local ghandler = GestureHandler();
+	local go = GestureObserver(scape);
 	
 	-- Swipes
-	--ghandler.OnSwipeEnd = OnSwipeEnd;
-	--ghandler.OnSwipeBegin = OnSwipeBegin;
+	--go.OnSwipeEnd = OnSwipeEnd;
+	--go.OnSwipeBegin = OnSwipeBegin;
 
 	-- Circles
-	ghandler.OnCircleBegin = OnCircleBegin;
-	ghandler.OnCircling = OnCircling;
-	ghandler.OnCircleEnd = OnCircleEnd;
+	go.OnCircleBegin = OnCircleBegin;
+	go.OnCircling = OnCircling;
+	go.OnCircleEnd = OnCircleEnd;
 
 	-- Taps
-	--ghandler.OnKeyTap = OnKeyTap;
-	--ghandler.OnScreenTap = OnScreenTap;
+	--go.OnKeyTap = OnKeyTap;
+	--go.OnScreenTap = OnScreenTap;
 
-
-	scape.GestureHandler = ghandler;
-
-	spawn(scape.Start, scape)
+	scape:Start();
 end
 
 run(main);

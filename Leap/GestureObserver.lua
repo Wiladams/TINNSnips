@@ -5,22 +5,36 @@
 
 
 
-GestureHandler_t = {}
-GestureHandler_mt = {
-	__index = GestureHandler_t;
+GestureObserver_t = {}
+GestureObserver_mt = {
+	__index = GestureObserver_t;
 }
 
-GestureHandler = function()
+GestureObserver = function(scape)
 	local obj = {
 		CurrentGesture = "none";
 	}
 
-	setmetatable(obj, GestureHandler_mt);
+	setmetatable(obj, GestureObserver_mt);
+
+	if scape then
+		scape:AddFrameObserver(obj.OnFrame, obj)
+		obj.LeapScape = scape;
+	end
 
 	return obj;
 end
 
-GestureHandler_t.OnGesture = function(self, gesture)
+GestureObserver_t.OnFrame = function(self, frame)
+	if frame.gestures and #frame.gestures > 0 then
+		for _, gesture in ipairs(frame.gestures) do
+			self:OnGesture(gesture);
+		end
+	end
+end
+
+
+GestureObserver_t.OnGesture = function(self, gesture)
 	--print("==== GESTURE ====")
 	--print("type: ", gesture.type, gesture.state);
 
@@ -35,7 +49,7 @@ GestureHandler_t.OnGesture = function(self, gesture)
 	end
 end
 
-GestureHandler_t.HandleScreenTap = function(self, gesture)
+GestureObserver_t.HandleScreenTap = function(self, gesture)
 	if self.CurrentGesture == "none" then
 		if self.OnScreenTap then
 			self.OnScreenTap(gesture);
@@ -43,7 +57,7 @@ GestureHandler_t.HandleScreenTap = function(self, gesture)
 	end
 end
 
-GestureHandler_t.HandleKeyTap = function(self, gesture)
+GestureObserver_t.HandleKeyTap = function(self, gesture)
 	if self.CurrentGesture == "none" then
 		if self.OnKeyTap then
 			self.OnKeyTap(gesture);
@@ -51,7 +65,7 @@ GestureHandler_t.HandleKeyTap = function(self, gesture)
 	end
 end
 
-GestureHandler_t.HandleCircle = function(self, gesture)
+GestureObserver_t.HandleCircle = function(self, gesture)
 	if not (self.OnCircleBegin or self.OnCircling or self.OnCircleEnd) then
 		return
 	end
@@ -75,7 +89,7 @@ GestureHandler_t.HandleCircle = function(self, gesture)
 	end
 end
 
-GestureHandler_t.HandleSwipe = function(self, gesture)
+GestureObserver_t.HandleSwipe = function(self, gesture)
 	if not (self.OnSwipeBegin or self.OnSwiping or self.OnSwipeEnd) then
 		return
 	end
@@ -99,7 +113,7 @@ GestureHandler_t.HandleSwipe = function(self, gesture)
 	end
 end
 
-return GestureHandler
+return GestureObserver
 
 --[===[
 {
