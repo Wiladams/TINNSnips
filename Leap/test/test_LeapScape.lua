@@ -1,5 +1,5 @@
+package.path = package.path.."../../?.lua"
 
-local Runtime = require("Runtime");
 local LeapScape = require ("Leap.LeapScape");
 local GestureHandler = require("Leap.GestureHandler");
 

@@ -1,4 +1,7 @@
+package.path = package.path.."../../?.lua"
+
 local LeapMath = require("LeapMath");
+
 local Vector = LeapMath.Vector;
 
 local vec1 = Vector.new();

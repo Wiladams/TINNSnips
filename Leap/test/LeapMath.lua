@@ -6,42 +6,31 @@
 * between Leap Motion and you, your company or other organization.             *
 \*****************************************************************************--]]
 
+--[[
+ * The Leap software employs a right-handed Cartesian coordinate system.
+ * Values given are in units of real-world millimeters. The origin is centered
+ * at the center of the Leap device. The x- and z-axes lie in the horizontal
+ * plane, with the x-axis running parallel to the long edge of the device.
+ * The y-axis is vertical, with positive values increasing upwards.
+ * The z-axis has positive values increasing away from the computer screen.
+ --]]
+ 
+local ffi = require("ffi");
 
 local acos = math.acos;
 local atan2 = math.atan2;
 local sqrt = math.sqrt;
 
 local PI = math.pi;
-local Epsilon = 0.0000001;
-
---[[* The constant pi as a single precision floating point number. --]]
---local PI          = 3.1415926536;
---[[*
- * The constant ratio to convert an angle measure from degrees to radians.
- * Multiply a value in degrees by this constant to convert to radians.
- --]]
 local DEG_TO_RAD  = 0.0174532925;
---[[*
- * The constant ratio to convert an angle measure from radians to degrees.
- * Multiply a value in radians by this constant to convert to degrees.
- --]]
 local RAD_TO_DEG  = 57.295779513;
+local Epsilon = 0.0000001;			-- A fairly small number for comparisons
+
 
 --[[*
- * The Vector struct represents a three-component mathematical vector or point
- * such as a direction or position in three-dimensional space.
- *
- * The Leap software employs a right-handed Cartesian coordinate system.
- * Values given are in units of real-world millimeters. The origin is centered
- * at the center of the Leap device. The x- and z-axes lie in the horizontal
- * plane, with the x-axis running parallel to the long edge of the device.
- * The y-axis is vertical, with positive values increasing upwards (in contrast
- * to the downward orientation of most computer graphics coordinate systems).
- * The z-axis has positive values increasing away from the computer screen.
- *
- * \image html images/Leap_Axes.png
+ The Vector struct represents a three-component mathematical vector or point
+ such as a direction or position in three-dimensional space.
  --]]
-
 
 Vector_t = {}
 Vector_mt = {
@@ -96,16 +85,12 @@ Vector_t.new = function (x, y, z)
 end
 
 --[=[
-  --[[* Creates a new Vector with the specified component values. --]]
-  Vector(float _x, float _y, float _z) :
-    x(_x), y(_y), z(_z) {}
-
   --[[* Copies the specified Vector. --]]
   Vector(const Vector& vector) :
     x(vector.x), y(vector.y), z(vector.z) {}
 --]=]
 
-Vector_t.zero = Vector_t.new(); --[[ The zero vector: (0, 0, 0) --]]
+Vector_t.zero = Vector_t.new(0,0,0); --[[ The zero vector: (0, 0, 0) --]]
 
 Vector_t.xAxis = Vector_t.new(1, 0, 0);   --[[ The x-axis unit vector: (1, 0, 0) --]]
 Vector_t.yAxis = Vector_t.new(0, 1, 0);   --[[ The y-axis unit vector: (0, 1, 0) --]]
@@ -218,7 +203,7 @@ end
   Returns true if all of the vector's components are finite.  If any
   component is NaN or infinite, then this returns false.
 --]]
-Vector_t.isValid(self)
+Vector_t.isValid = function(self)
   return self.x ~= math.huge and self.y ~= math.huge and self.z ~= math.huge;
 end
 
@@ -306,7 +291,7 @@ Matrix_mt = {
     return tostring(self.xBasis)..'\n'..tostring(self.yBasis)..'\n'..tostring(self.zBasis)..'\n'..tostring(self.origin);  
   end;
 
-end
+}
 
 --[[ Constructs an identity transformation matrix. --]]
 Matrix_t.new = function(a,b,c,  d,e,f, g,h,i,  x,y,z)
@@ -351,7 +336,7 @@ Matrix_t.identity = Matrix_t.new(1,0,0,  0,1,0,  0,0,1,  0,0,0);
    * @param _axis A Vector specifying the axis of rotation.
    * @param angleRadians The amount of rotation in radians.
    --]]
-Matrix_t.setRotation(self, _axis, angleRadians) 
+Matrix_t.setRotation = function(self, _axis, angleRadians) 
     local axis = _axis:normalized();
     local s = math.sin(angleRadians);
     local c = math.cos(angleRadians);
@@ -360,7 +345,7 @@ Matrix_t.setRotation(self, _axis, angleRadians)
     self.xBasis = Vector_t.new(axis.x*axis.x*C + c, axis.x*axis.y*C - axis.z*s, axis.x*axis.z*C + axis.y*s);
     self.yBasis = Vector_t.new(axis.y*axis.x*C + axis.z*s, axis.y*axis.y*C + c, axis.y*axis.z*C - axis.x*s);
     self.zBasis = Vector_t.new(axis.z*axis.x*C - axis.y*s, axis.z*axis.y*C + axis.x*s, axis.z*axis.z*C + c);
-}
+end
 
 --[[
   Transforms a vector with this matrix by transforming its rotation and
@@ -369,7 +354,7 @@ Matrix_t.setRotation(self, _axis, angleRadians)
  @param in The Vector to transform.
  @returns A new Vector representing the transformed original.
 --]]
-Matrix_t.transformDirection = function(self, const Vector& incoming)
+Matrix_t.transformDirection = function(self, incoming)
     return xBasis*incoming.x + yBasis*incoming.y + zBasis*incoming.z;
 end
 
