@@ -28,17 +28,18 @@ local observepointer = function(param, event)
 	d = event.direction;
 	v = event.tipVelocity;
 
-	--print("  Pos: ", tp[1], tp[2], tp[3]);
-	print("  Dir: ", d[1], d[2], d[3]);
+	print("  Pos: ", tp[1], tp[2], tp[3]);
+	--print("  Dir: ", d[1], d[2], d[3]);
 	--print("  Vel: ", v[1], v[2], v[3]);
 	--printDict(event);
 end
 
 
+
+
+local fo = FrameObserver(scape);
+
 local main = function()
-
-	local fo = FrameObserver(scape);
-
 	fo:AddPointerObserver(observepointer, nil)
 
 	scape:Start();

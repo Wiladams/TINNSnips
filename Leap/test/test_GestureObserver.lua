@@ -72,24 +72,23 @@ local OnKeyTap = function(gesture)
 end
 
 
+local go = GestureObserver(scape);
 
 local main = function()
-	local go = GestureObserver(scape);
+	scape:Start();
 	
-	-- Swipes
-	--go.OnSwipeEnd = OnSwipeEnd;
-	--go.OnSwipeBegin = OnSwipeBegin;
+	go.OnSwipeBegin = OnSwipeBegin;
+	go.OnSwipeEnd = OnSwipeEnd;
 
-	-- Circles
-	go.OnCircleBegin = OnCircleBegin;
-	go.OnCircling = OnCircling;
-	go.OnCircleEnd = OnCircleEnd;
+	-- Circles	
+	--go.OnCircleBegin = OnCircleBegin;
+	--go.OnCircling = OnCircling;
+	--go.OnCircleEnd = OnCircleEnd;
 
 	-- Taps
 	--go.OnKeyTap = OnKeyTap;
 	--go.OnScreenTap = OnScreenTap;
-
-	scape:Start();
 end
 
-run(main);
+
+run(main)

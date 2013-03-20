@@ -30,15 +30,27 @@ end
 --]]
 
 FrameObserver_t.AddHandObserver = function(self, observer, arg)
-	self.HandObservers[handler] = arg or self;
+	if observer then
+		self.HandObservers[observer] = arg or self;
+	end
 end
 
-FrameObserver_t.AddGestureObserver = function(self, handler, arg)
-	self.GestureObservers[handler] = arg or self;
+FrameObserver_t.AddGestureObserver = function(self, observer, arg)
+	if observer then
+		self.GestureObservers[observer] = arg or self;
+	end
 end
 
-FrameObserver_t.AddPointerObserver = function(self, handler, arg)
-	self.PointerObservers[handler] = arg or self;
+
+FrameObserver_t.AddPointerObserver = function(self, observer, arg)
+	if observer then
+		self.PointerObservers[observer] = arg or self;
+	end
+end
+FrameObserver_t.RemovePointerObserver = function(self, observer)
+	if observer then
+		self.PointerObservers[observer] = nil;
+	end
 end
 
 FrameObserver_t.AddToolObserver = function(self, handler, arg)

@@ -10,8 +10,6 @@ local User32 = require ("User32")
 local Kernel32 = require("win_kernel32");
 
 
-local ScreenWidth = User32.GetSystemMetrics(User32.FFI.CXSCREEN);
-local ScreenHeight = User32.GetSystemMetrics(User32.FFI.CYSCREEN);
 
 
 --[[
@@ -25,13 +23,16 @@ typedef struct tagMOUSEINPUT {
 } MOUSEINPUT, *PMOUSEINPUT;
 --]]
 
-local UIOSimulator = {}
+local UIOSimulator = {
+	ScreenWidth = User32.GetSystemMetrics(User32.FFI.CXSCREEN);
+	ScreenHeight = User32.GetSystemMetrics(User32.FFI.CYSCREEN);
+}
 
 
 
 UIOSimulator.MouseDown = function(x, y, which)
-	local dx = math.ceil(x*65536/ScreenWidth)
-	local dy = math.ceil(y*65536/ScreenHeight)
+	local dx = math.ceil(x*65536/UIOSimulator.ScreenWidth)
+	local dy = math.ceil(y*65536/UIOSimulator.ScreenHeight)
 
 	-- construct mouseinput structure
 	-- call sendinput
@@ -47,8 +48,8 @@ end
 
 UIOSimulator.MouseUp = function(x, y, which)
 --print("InjectMouseUp")
-	local dx = math.ceil(x*65536/ScreenWidth)
-	local dy = math.ceil(y*65536/ScreenHeight)
+	local dx = math.ceil(x*65536/UIOSimulator.ScreenWidth)
+	local dy = math.ceil(y*65536/UIOSimulator.ScreenHeight)
 	-- construct mouseinput structure
 	-- call sendinput
 	local minput = ffi.new("INPUT");
@@ -62,8 +63,8 @@ UIOSimulator.MouseUp = function(x, y, which)
 end
 
 UIOSimulator.MouseMove = function(x, y)
-	local dx = math.ceil(x*65536/ScreenWidth)
-	local dy = math.ceil(y*65536/ScreenHeight)
+	local dx = math.ceil(x*65536/UIOSimulator.ScreenWidth)
+	local dy = math.ceil(y*65536/UIOSimulator.ScreenHeight)
 
 	-- construct mouseinput structure
 	-- call sendinput
