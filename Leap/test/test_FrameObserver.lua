@@ -4,9 +4,6 @@ package.path = package.path.."../?.lua"
 local LeapScape = require ("LeapScape");
 local FrameObserver = require("FrameObserver");
 
-
-
-
 local scape, err = LeapScape();
 
 if not scape then 

@@ -19,8 +19,8 @@ end
 	max = 473.92, 709.31, 281.50
 --]]
 
-local max = {-math.huge, -math.huge, -math.huge}
-local min = {math.huge, math.huge, math.huge}
+local sensemax = {-math.huge, -math.huge, -math.huge}
+local sensemin = {math.huge, math.huge, math.huge}
 
 local findvolume = function(param, event)
 	local newvalue = false
@@ -38,11 +38,11 @@ local findvolume = function(param, event)
 
 
 	print("================")
-	print(string.format("x: %3.2f == %3.2f", min[1], max[1]));
-	print(string.format("y: %3.2f == %3.2f", min[2], max[2]));
-	print(string.format("z: %3.2f == %3.2f", min[3], max[3]));
+	print(string.format("x: %3.2f == %3.2f", sensemin[1], sensemax[1]));
+	print(string.format("y: %3.2f == %3.2f", sensemin[2], sensemax[2]));
+	print(string.format("z: %3.2f == %3.2f", sensemin[3], sensemax[3]));
 
-	return min, max
+	return sensemin, sensemax
 end
 
 

@@ -1,4 +1,3 @@
---package.path = package.path.."../../?.lua"
 package.path = package.path.."../?.lua"
 
 local LeapScape = require ("LeapScape");
@@ -30,7 +29,7 @@ end
 
 local OnHand = function(param, hand)
 	local c = hand.sphereCenter;
-	print("OnHand: ", hand.id, hand.sphereRadius, c[1], c[2], c[3]);
+	print(string.format("OnHand: %d  %03.2f [%03.2f, %03.2f, %03.2f]", hand.id, hand.sphereRadius, c[1], c[2], c[3]));
 
 	--UIOSimulator.MouseMove(x, y);
 end

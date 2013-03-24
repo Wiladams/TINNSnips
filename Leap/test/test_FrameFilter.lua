@@ -13,13 +13,16 @@ assert(leap, "Error Loading Leap Interface: ", err);
 local printHand = function(hand)
 	local c = hand.sphereCenter;
 	local r = hand.sphereRadius;
-	local n = hand.palmNormal;
 	print(string.format("HAND: %3.2f  [%3.2f %3.2f %3.2f]", r, c[1], c[3], c[3]));
 end
 
 -- Only allow the hand events to come through
-local handfilter = function(event)
-	return event.palmNormal ~= nil
+local handfilter = function(param, event)
+	if event.palmNormal ~= nil then
+		return event
+	end
+
+	return nil
 end
 
 local main = function()

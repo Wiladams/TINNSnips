@@ -17,8 +17,9 @@ end
 
 local main = function()
 	for frame in FrameEnumerator(leap) do
-		print("==================");
-		printDict(frame);
+		--print("==================");
+		--printDict(frame);
+		print(frame.s);
 	end	
 end
 

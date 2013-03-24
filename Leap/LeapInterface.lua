@@ -8,37 +8,13 @@ local b64 = require("base64");
 local HttpResponse = require("HttpResponse");
 local JSON = require("dkjson");
 
-local WebSocketStream = require("Leap.WebSocketStream");
+local WebSocketStream = require("WebSocketStream");
 
 local tinsert = table.insert
 local format = string.format
 
-local printDict = function(dict)
-	for k,v in pairs(dict) do
-		print(k,v);
-	end
-end
 
-local UpgradeRequest = function(req)
-	local lines = {
-    	format('GET %s HTTP/1.1',req.uri or ''),
-    	format('Host: %s',req.host),
-    	'Upgrade: websocket',
-    	'Connection: Upgrade',
-    	format('Sec-WebSocket-Key: %s',req.key),
---    	format('Sec-WebSocket-Protocol: %s',table.concat(req.protocols,', ')),
-    	'Sec-WebSocket-Version: 13',
-	}
 
-	if req.origin then
-    	tinsert(lines,string.format('Origin: %s',req.origin))
-  	end
-  if req.port and req.port ~= 80 then
-    lines[2] = format('Host: %s:%d',req.host,req.port)
-  end
-  tinsert(lines,'\r\n')
-  return table.concat(lines,'\r\n')
-end
 
 local LeapInterface_t = {}
 local LeapInterface_mt = {
@@ -49,59 +25,33 @@ local LeapInterface_mt = {
 local LeapInterface = function(params)
 	params = params or {url = "ws://127.0.0.1:6437/", enableGestures=true}
 
-	--url = url or "ws://127.0.0.1:6437/"
-	--print("LeapInterface()",  url)
-
-	local urlparts = UrlParser.parse(params.url or "ws://127.0.0.1:6437/", {port="80", path="/", scheme="http"});
-
---printDict(urlparts);
+	print("LeapInterface(): ",  params.url);
 
 	-- establish a TCP connection to the intended service
+	local urlparts = UrlParser.parse(params.url or "ws://127.0.0.1:6437/", {port="80", path="/", scheme="ws"});
+
+print("URL Parts: ", urlparts.host, urlparts.port);
+
 	local stream, err = NetStream.Open(urlparts.host, urlparts.port);
+
 	if not stream then
+print("LeapInterface(), NETSTREAM: ", stream, err);
 		return false, err
 	end
 
---print("NETSTREAM: ", stream);
-
-	local rngBuff, err = BCrypt.GetRandomBytes(16)
-	if not rngBuff then
-		return false, err
-	end
-	local nonce = b64.encode(rngBuff, 16);
+	local socketstream = WebSocketStream(stream);
 
 	local req = {
-		uri = url,
+		uri = params.url,
 		host = urlparts.host,
 		port = urlparts.port,
 		key = nonce,
 		origin = "http://localhost",
 		protocols = {},
 	}
+	local origin = "http://localhost"
 
-	local upgraded = UpgradeRequest(req);
-
---print("UPGRADED");
---print(upgraded);
-
-	local success, err = stream:WriteString(upgraded);
---print("REQUEST: ", success, err, #upgraded);
-
-	-- Get the response back
-	local response, err = HttpResponse.Parse(stream);
---print("RESPONSE");
---print(response, response.Status, response.Phrase)
-
-	if not response then 
-		return false, err
-	end
-
-	if response.Status ~= "101" then
-		return false, response.Status
-	end
-
-	local socketstream = WebSocketStream();
-	socketstream.SourceStream = stream;
+	socketstream:InitiateClientHandshake(params.url, origin);
 
 	local obj = {
 		SocketStream = socketstream,
