@@ -14,8 +14,6 @@ local tinsert = table.insert
 local format = string.format
 
 
-
-
 local LeapInterface_t = {}
 local LeapInterface_mt = {
 	__index = LeapInterface_t,

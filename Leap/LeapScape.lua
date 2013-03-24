@@ -12,7 +12,7 @@ local LeapScape_mt = {
 }
 
 local LeapScape = function()
-	local interface, err = LeapInterface({enableGestures=true});
+	local interface, err = LeapInterface();
 
 	if not interface then
 		return nil, err;

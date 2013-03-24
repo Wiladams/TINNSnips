@@ -1,8 +1,8 @@
 --package.path = package.path.."../../?.lua"
-package.path = package.path.."../?.lua"
+package.path = package.path.."../../?.lua"
 
-local LeapScape = require ("LeapScape");
-local MouseBehavior = require("MouseBehavior");
+local LeapScape = require ("Leap.LeapScape");
+local MouseBehavior = require("Leap.MouseBehavior");
 local UIOSimulator = require("UIOSimulator");
 
 
