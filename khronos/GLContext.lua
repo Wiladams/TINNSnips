@@ -142,15 +142,19 @@ print("SetPixelFormat, RETURNED: %d", err);
 		0,0
 		});
 
-    local hRC = OglMan.wglCreateContextAttribsARB(ffi.cast("void *", hDC), nil, ctxAttribs);
-	CHECKGL("wglCreateContextAttribsARB");
--- print(string.format("hRC: 0x%x", hRC));
-	if (hRC == nil) then
-		-- If creating the context that way failed for
-		-- some reason, fall back to the old way of
-		-- creating a context.
+	local hRC = nil;
+	if OglMan.wglCreateContextAttribsARB then
+    	hRC = OglMan.wglCreateContextAttribsARB(ffi.cast("void *", hDC), nil, ctxAttribs);
+		CHECKGL("wglCreateContextAttribsARB");
+
+		if hRC == nil then
+			hRC = OglMan.Lib.wglCreateContext(hDC);
+		end
+	else
 		hRC = OglMan.Lib.wglCreateContext(hDC);
 	end
+
+-- print(string.format("hRC: 0x%x", hRC));
 
 	if hRC == nil then
 		return false
