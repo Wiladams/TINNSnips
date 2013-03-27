@@ -12,6 +12,8 @@ bor = bit.bor;
 rshift = bit.rshift;
 lshift = bit.lshift;
 
+local global = _G;
+
 --local apppath = string.format([[;%s\?.lua;%s\core\?.lua;%s\core\Win32\?.lua;%s\modules\?.lua]],argv[1], argv[1], argv[1], argv[1]);
 --local ppath = package.path..apppath;
 --package.path = ppath;
@@ -20,17 +22,15 @@ lshift = bit.lshift;
 --package.cpath = package.cpath..libpath
 
 
+require ("WTypes");
 local Kernel32 = require("win_kernel32");
 local User32 = require("User32");
-
-ogm = require("OglMan");
-glu = require("glu");
-
-require ("WTypes");
 local KeyMouse = require ("KeyMouse");
-local GLWindow = require ("GLWindow");
 local StopWatch = require("StopWatch");
---local Controller = require("Controller");
+
+ogm = require("khronos.OglMan");
+glu = require("khronos.glu");
+local GLWindow = require ("khronos.GLWindow");
 
 
 
@@ -102,7 +102,7 @@ function OnWindowResized(width, height)
 	View3D_t.WindowWidth = width;
 	View3D_t.WindowHeight = height;
 
-	if _G.reshape then
+	if global.reshape then
 		reshape(width, height);
 	else
 		gl.glViewport(0, 0, width, height);
@@ -115,15 +115,23 @@ function OnKeyMouse(hWnd, msg, wParam, lParam)
 	local event = KeyMouse.ConvertKeyMouse(hWnd, msg, wParam, lParam);
 
 	if event then
-		local func = _G[event.kind]
+		if global["onkeymouse"] then
+			onkeymouse(event);
+		else
+			local func = global[event.kind]
 		
-		if not func then
-			--return false, string.format("OnKeyMouse, no event dispatcher found for kind: %s", event.kind);
-			return false;
+			if not func then
+				--return false, string.format("OnKeyMouse, no event dispatcher found for kind: %s", event.kind);
+				return false;
+			end
+
+			func(event);
 		end
 
-		func(event);
+		return true
 	end
+
+	return false;
 end
 
 
@@ -220,8 +228,8 @@ local main = function()
 
 	-- If there is a setup routine,
 	-- run that before anything else
-	if _G.init ~= nil then
-		_G.init();
+	if global.init ~= nil then
+		global.init();
 	end
 
 

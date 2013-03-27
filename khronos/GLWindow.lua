@@ -13,9 +13,9 @@ local rshift = bit.rshift;
 local Gdi32 = require ("GDI32");
 local User32 = require ("User32");
 local Kernel32 = require ("win_kernel32");
-local GLContext = require("GLContext");
-
 local StopWatch = require ("StopWatch");
+
+local GLContext = require("khronos.GLContext");
 
 
 local GLWindow_t = {

@@ -1,6 +1,6 @@
 --local ffi   = require( "ffi" )
 --local gl    = require( "gl" )
---require "BanateCore"
+
 
 local function checkGL( str )
 	local r = gl.glGetError()
@@ -12,32 +12,35 @@ local function checkGL( str )
 end
 
 
-class.GLTexture()
-
-GLTexture.Defaults = {
+GLTexture_t = {
 	UnpackAlignment = 1,
+}
+GLTexture_mt = {
+	__index = GLTexture_t;
 }
 
 
 
-function GLTexture:_init(width, height, gpuFormat, data, dataFormat, datatype, bytesPerElement)
+local GLTexture = function(width, height, gpuFormat, data, dataFormat, datatype, bytesPerElement)
 --print("GLTexture:_init")
-
-	self.Width = width
-	self.Height = height
-
 	-- Get a texture ID for this texture
 	local tid = ffi.new( "GLuint[1]" )
 	gl.glGenTextures( 1, tid )
-	self.TextureID = tid[0]
-	checkGL( "glBenTextures" )
+	checkGL( "glGenTextures" )
+
+	local obj = {
+		Width = width;
+		Height = height;
+		TextureID = tid[0];
+	}
+	setmetatable(obj, GLTexture_mt);
 
 	-- Enable Texture Mapping
 	glEnable(GL_TEXTURE_2D)
 
 	-- Bind to the texture so opengl knows which Texture object
 	-- we are operating on
-	gl.glBindTexture( GL_TEXTURE_2D, self.TextureID )
+	gl.glBindTexture( GL_TEXTURE_2D, obj.TextureID )
 	checkGL( "glBindTexture")
 
 
@@ -57,12 +60,12 @@ function GLTexture:_init(width, height, gpuFormat, data, dataFormat, datatype, b
 --print(string.format("  incoming: 0x%x", incoming))
 --print("Size: ", self.Width, self.Height)
 
-	gl.glPixelStorei(GL_UNPACK_ALIGNMENT, GLTexture.Defaults.UnpackAlignment)
+	gl.glPixelStorei(GL_UNPACK_ALIGNMENT, GLTexture_t.UnpackAlignment)
 	gl.glTexImage2D (GL_TEXTURE_2D,
 		0, 				-- texture level
 		gpuFormat, 	-- internal format
-		self.Width, 	-- width
-		self.Height, 	-- height
+		obj.Width, 	-- width
+		obj.Height, 	-- height
 		0, 				-- border
 		dataFormat, 		-- format of incoming data
 		datatype,	-- data type of incoming data
@@ -72,9 +75,11 @@ function GLTexture:_init(width, height, gpuFormat, data, dataFormat, datatype, b
 
 	-- Disable Texture Mapping
 	glDisable(GL_TEXTURE_2D)
+
+	return obj;
 end
 
-function GLTexture:SetFilters(minFilter, magFilter)
+function GLTexture_t:SetFilters(minFilter, magFilter)
 	gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter)
 	checkGL("minfilter")
 	gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter)
@@ -82,14 +87,14 @@ function GLTexture:SetFilters(minFilter, magFilter)
 end
 
 
-function GLTexture.MakeCurrent(self)
+GLTexture_t.MakeCurrent = function(self)
 --print("Texture.MakeCurrent() - ID: ", self.TextureID);
 	gl.glBindTexture(GL_TEXTURE_2D, self.TextureID)
 	checkGL("glBindTexture")
 end
 
 
-function GLTexture:CopyPixelData(width, height, data, dataFormat, datatype)
+GLTexture_t.CopyPixelData = function(self, width, height, data, dataFormat, datatype)
 	datatype = datatype or GL_UNSIGNED_BYTE
 
 --print("Texture.CopyPixelBuffer: Width/Height: ", width, height)
@@ -115,7 +120,7 @@ function GLTexture:CopyPixelData(width, height, data, dataFormat, datatype)
 end
 
 
-function GLTexture.CopyPixelBuffer(self, pixelaccessor)
+GLTexture_t.CopyPixelBuffer = function(self, pixelaccessor)
 	local incoming = GL_BGRA
 	if pixelaccessor.BitsPerElement == 24 then
 		incoming = GL_BGR
@@ -142,7 +147,7 @@ function GLTexture.CopyPixelBuffer(self, pixelaccessor)
 		pixelaccessor.Data)		-- pointer to incoming data
 end
 
-function GLTexture.Render(self, x, y, awidth, aheight)
+function GLTexture_t.Render(self, x, y, awidth, aheight)
 	x = x or 0
 	y = y or 0
 	awidth = awidth or self.Width
@@ -182,7 +187,7 @@ end
 
 
 
-function GLTexture.Create(width, height, gpuFormat, data, dataFormat, datatype, bytesPerElement)
+function GLTexture_t.Create(width, height, gpuFormat, data, dataFormat, datatype, bytesPerElement)
 	gpuFormat = gpuFormat or GL_RGB
 	data = data or nil
 	dataFormat = dataFormat or GL_RGB
@@ -192,7 +197,7 @@ function GLTexture.Create(width, height, gpuFormat, data, dataFormat, datatype, 
 	return GLTexture(width, height, gpuFormat, data, dataFormat, datatype, bytesPerElement)
 end
 
-function GLTexture.CreateFromAccessor(pixelaccessor)
+function GLTexture_t.CreateFromAccessor(pixelaccessor)
 	local dataFormat = GL_BGRA
 	if pixelaccessor.BitsPerElement == 24 then
 		dataFormat = GL_BGR
@@ -201,3 +206,10 @@ function GLTexture.CreateFromAccessor(pixelaccessor)
 	return GLTexture(pixelaccessor.Width, pixelaccessor.Height, GL_RGB,
 		pixelaccessor.Data, dataFormat, pixelaccessor.BytesPerElement)
 end
+
+
+return {
+	new = GLTexture,
+	Create = GLTexture_t.Create,
+	CreateFromAccessor = GLTexture_t.CreateFromAccessor,
+}	

@@ -48,6 +48,51 @@ __lt
 __le
 --]]
 
+local vec3_t =  {
+	AngleBetween = function(self,rhs)
+		return math.acos(self:Dot(rhs))
+	end,
+
+	Assign = function(self, rhs)
+			self.x = rhs.x;
+			self.y = rhs.y;
+			self.z = rhs.z;
+	end,
+
+	Clone = function(self)
+			return ffi.new(ffi.typeof(self), self.x, self.y, self.z);
+	end,
+
+	Cross = function(self, v)
+			return ffi.new(ffi.typeof(self),
+				self.y*v.z - v.y*self.z,
+				-self.x*v.z + v.x*self.z,
+				self.x*v.y - v.x*self.y);
+	end,
+
+	Dot = function(self, rhs)
+			return self.x*rhs.x + self.y*rhs.y + self.z*rhs.z;
+	end,
+
+	Length = function(self)
+			return math.sqrt(self:LengthSquared())
+	end,
+
+	LengthSquared = function(self)
+			return self:Dot(self)
+	end,
+
+	Normal = function(self)
+			local scalar = 1/self:Length()
+
+			return ffi.new(ffi.typeof(self),
+				self.x * scalar,
+				self.y * scalar,
+				self.z * scalar);
+	end,
+}
+
+
 local vec3_mt = {
 	__len = function(self)
 		return 3
@@ -55,9 +100,7 @@ local vec3_mt = {
 	
 	__new = function(ct, x, y, z)
 		--print("NEW - vec3_mt: ", ct, size);
-		local obj = ffi.new(ct, x, y, z)
-
-		return obj
+		return ffi.new(ct, x, y, z)
 	end,
 
 	__tostring = function(self)
@@ -115,49 +158,8 @@ local vec3_mt = {
 		end
 	end,
 
-	__index = {
-		AngleBetween = function(self,rhs)
-			return math.acos(self:Dot(rhs))
-		end,
+	__index = vec3_t;
 
-		Assign = function(self, rhs)
-			self.x = rhs.x;
-			self.y = rhs.y;
-			self.z = rhs.z;
-		end,
-
-		Clone = function(self)
-			return ffi.new(ffi.typeof(self), self.x, self.y, self.z);
-		end,
-
-		Cross = function(self, v)
-			return ffi.new(ffi.typeof(self),
-				self.y*v.z - v.y*self.z,
-				-self.x*v.z + v.x*self.z,
-				self.x*v.y - v.x*self.y);
-		end,
-
-		Dot = function(self, rhs)
-			return self.x*rhs.x + self.y*rhs.y + self.z*rhs.z;
-		end,
-
-		Length = function(self)
-			return math.sqrt(self:LengthSquared())
-		end,
-
-		LengthSquared = function(self)
-			return self:Dot(self)
-		end,
-
-		Normal = function(self)
-			local scalar = 1/self:Length()
-
-			return ffi.new(ffi.typeof(self),
-				self.x * scalar,
-				self.y * scalar,
-				self.z * scalar);
-		end,
-	},
 }
 
 

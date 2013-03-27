@@ -4,9 +4,10 @@ local bit = require("bit");
 local bor = bit.bor;
 
 local Kernel32 = require("win_kernel32");
-local OglMan = require("OglMan");
 local User32 = require("User32");
 local GDI32 = require("GDI32");
+
+local OglMan = require("khronos.OglMan");
 
 
 
@@ -128,7 +129,7 @@ local CreateGLContext = function(hWnd, majorversion, minorversion, multisamplemo
 	local hDC = User32.Lib.GetDC(hWnd);
 	err = GDI32.Lib.SetPixelFormat(hDC, pixelFormat, pfd);
 
-print("SetPixelFormat, RETURNED: %d", err);
+--print("SetPixelFormat, RETURNED: %d", err);
 
 
 	-- And finally, create a context of the specific

@@ -49,6 +49,7 @@ function Controller_t:OnWindowResizing(width, height)
 	print("OnWindowResizing");
 end
 
+--[[
 local keymousedispatch = {
 	mousemove = mousemove;
 	mousedown = mousedown;
@@ -63,7 +64,6 @@ Controller_t.OnKeyMouse = function(self, event)
 --print("Controller_t:OnKeyMouse(): ", event.kind);
 
 	local func = _G[event.kind]
-	--local func = keymousedispatch[event.kind]
 	if not func then
 		return false, string.format("OnKeyMouse, no event dispatcher found for kind: %s", event.kind);
 	end
@@ -72,7 +72,7 @@ Controller_t.OnKeyMouse = function(self, event)
 
 	return true;
 end
-
+--]]
 
 --[==============================[
 	Compiling
