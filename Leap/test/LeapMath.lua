@@ -36,8 +36,8 @@ local Epsilon = 0.0000001;			-- A fairly small number for comparisons
  such as a direction or position in three-dimensional space.
  --]]
 
-Vector_t = {}
-Vector_mt = {
+local Vector_t = {}
+local Vector_mt = {
   __index = Vector_t;
 
   __tostring = function(self)
@@ -256,40 +256,45 @@ end
 --]===]
 
 
-float16_t = ffi.typeof("float[16]")
-double16_t = ffi.typeof("double[16]")
-
---[===[
---[[*
+--[[
+*
  *  The FloatArray struct is used to allow the returning of native float arrays
  * without requiring dynamic memory allocation.  It represents a matrix
  * with a size up to 4x4.
  --]]
-struct FloatArray {
-  --[[* Access the elements of the float array exactly like a native array --]]
-  float& operator[] (unsigned int index) {
-    return m_array[index];
-  }
 
-  --[[* Use the Float Array anywhere a float pointer can be used --]]
-  operator float* () {
-    return m_array;
-  }
-
-  --[[* Use the Float Array anywhere a const float pointer can be used --]]
-  operator const float* () const {
-    return m_array;
-  }
-
-  --[[* An array containing up to 16 entries of the matrix --]]
-  float m_array[16];
-};
---]===]
+local float16_t = ffi.typeof("float[16]")
+local double16_t = ffi.typeof("double[16]")
 
 
-Matrix_t = {}
-Matrix_mt = {
+
+local Matrix_t = {}
+local Matrix_mt = {
   __index = Matrix_t;
+
+  --[[* Compare Matrix equality component-wise. --]]
+  __eq = function(self, other)
+     return self.xBasis == other.xBasis and
+           self.yBasis == other.yBasis and
+           self.zBasis == other.zBasis and
+           self.origin == other.origin;
+  end;
+
+  --[[*
+   *  Multiply transform matrices.
+   *
+   * Combines two transformations into a single equivalent transformation.
+   *
+   * @param other A Matrix to multiply on the right hand side.
+   * @returns A new Matrix representing the transformation equivalent to
+   * applying the other transformation followed by this transformation.
+   --]]
+  __mul = function(self, other)
+     return Matrix_t.new(self:transformDirection(other.xBasis),
+                  self:transformDirection(other.yBasis),
+                  self:transformDirection(other.zBasis),
+                  self:transformPoint(other.origin));
+  end;
 
   __tostring = function(self) 
     return tostring(self.xBasis)..'\n'..tostring(self.yBasis)..'\n'..tostring(self.zBasis)..'\n'..tostring(self.origin);  
@@ -298,7 +303,7 @@ Matrix_mt = {
 }
 
 --[[ Constructs an identity transformation matrix. --]]
-Matrix_t.new = function(a,b,c,  d,e,f, g,h,i,  x,y,z)
+Matrix_t.new = function(a,b,c,  d,e,f,  g,h,i,  x,y,z)
   a = a or 1;
   b = b or 0;
   c = c or 0;
@@ -456,6 +461,7 @@ end
     : origin(translation) {
     setRotation(axis, angleRadians);
   }
+--]===]
 
 
 
@@ -465,43 +471,6 @@ end
 
 
 
-
-
-  --[[*
-   *  Multiply transform matrices.
-   *
-   * Combines two transformations into a single equivalent transformation.
-   *
-   * @param other A Matrix to multiply on the right hand side.
-   * @returns A new Matrix representing the transformation equivalent to
-   * applying the other transformation followed by this transformation.
-   --]]
-  Matrix operator*(const Matrix& other) const {
-    return Matrix(transformDirection(other.xBasis),
-                  transformDirection(other.yBasis),
-                  transformDirection(other.zBasis),
-                  transformPoint(other.origin));
-  }
-
-  --[[* Multiply transform matrices and assign the product. --]]
-  Matrix& operator*=(const Matrix& other) {
-    return (*this) = (*this) * other;
-  }
-
-  --[[* Compare Matrix equality component-wise. --]]
-  bool operator==(const Matrix& other) const {
-    return xBasis == other.xBasis &&
-           yBasis == other.yBasis &&
-           zBasis == other.zBasis &&
-           origin == other.origin;
-  }
-  --[[* Compare Matrix inequality component-wise. --]]
-  bool operator!=(const Matrix& other) const {
-    return xBasis != other.xBasis ||
-           yBasis != other.yBasis ||
-           zBasis != other.zBasis ||
-           origin != other.origin;
-  }
 
   --[[*
    *  Convert a Leap::Matrix object to another 3x3 matrix type.
@@ -511,12 +480,13 @@ end
    *
    * Translation factors are discarded.
    --]]
-  template<typename Matrix3x3Type>
-  const Matrix3x3Type toMatrix3x3() const {
-    return Matrix3x3Type(xBasis.x, xBasis.y, xBasis.z,
-                         yBasis.x, yBasis.y, yBasis.z,
-                         zBasis.x, zBasis.y, zBasis.z);
-  }
+Matrix_t.toMatrix3x3 = function(self, ct)
+  return ct(self.xBasis.x, self.xBasis.y, self.xBasis.z,
+            self.yBasis.x, self.yBasis.y, self.yBasis.z,
+            self.zBasis.x, self.zBasis.y, self.zBasis.z);
+end
+
+
 
   --[[*
    *  Convert a Leap::Matrix object to another 4x4 matrix type.
@@ -524,75 +494,77 @@ end
    * The new type must define a constructor function that takes each matrix
    * element as a parameter in row-major order.
    --]]
-  template<typename Matrix4x4Type>
-  const Matrix4x4Type toMatrix4x4() const {
-    return Matrix4x4Type(xBasis.x, xBasis.y, xBasis.z, 0.0f,
-                         yBasis.x, yBasis.y, yBasis.z, 0.0f,
-                         zBasis.x, zBasis.y, zBasis.z, 0.0f,
-                         origin.x, origin.y, origin.z, 1.0f);
-  }
+Matrix_t.toMatrix4x4 = function(self, ct)
+  return ct(self.xBasis.x, self.xBasis.y, self.xBasis.z, 0.0,
+            self.yBasis.x, self.yBasis.y, self.yBasis.z, 0.0,
+            self.zBasis.x, self.zBasis.y, self.zBasis.z, 0.0,
+            self.origin.x, self.origin.y, self.origin.z, 1.0);
+end
 
-  --[[*
-   *  Writes the 3x3 Matrix object to a 9 element row-major float or
-   * double array.
-   *
-   * Translation factors are discarded.
-   *
-   * Returns a pointer to the same data.
-   --]]
-  template<typename T>
-  T* toArray3x3(T* output) const {
-    output[0] = xBasis.x; output[1] = xBasis.y; output[2] = xBasis.z;
-    output[3] = yBasis.x; output[4] = yBasis.y; output[5] = yBasis.z;
-    output[6] = zBasis.x; output[7] = zBasis.y; output[8] = zBasis.z;
-    return output;
-  }
 
-  --[[*
-   *  Convert a 3x3 Matrix object to a 9 element row-major float array.
+--[[
+  Writes the 3x3 Matrix object to a 9 element row-major float or
+  double array.
+
+  Translation factors are discarded.
+  
+  Returns a pointer to the same data.
+--]]
+
+Matrix_t.copyToArray3x3 = function(self, output)
+  output[0] = self.xBasis.x; output[1] = self.xBasis.y; output[2] = self.xBasis.z;
+  output[3] = self.yBasis.x; output[4] = self.yBasis.y; output[5] = self.yBasis.z;
+  output[6] = self.zBasis.x; output[7] = self.zBasis.y; output[8] = self.zBasis.z;
+  
+  return output;
+end
+
+--[[
+  Convert a 3x3 Matrix object to a 9 element row-major float array.
    *
    * Translation factors are discarded.
    *
    * Returns a FloatArray struct to avoid dynamic memory allocation.
-   --]]
-  FloatArray toArray3x3() const {
-    FloatArray output;
-    toArray3x3((float*)output);
+--]]
+Matrix_t.toArray3x3 = function(self, ct)
+  ct = ct or float16_t
+  local output = ct();
+  self:toArray3x3(output);
+  
+  return output;
+end
+
+
+--[[
+  Writes the 4x4 Matrix object to a 16 element row-major float
+  or double array.
+   
+  Returns a pointer to the same data.
+--]]
+
+Matrix_t.copyToArray4x4 = function(self, output)
+    output[0]  = self.xBasis.x; output[1]  = self.xBasis.y; output[2]  = self.xBasis.z; output[3]  = 0.0;
+    output[4]  = self.yBasis.x; output[5]  = self.yBasis.y; output[6]  = self.yBasis.z; output[7]  = 0.0;
+    output[8]  = self.zBasis.x; output[9]  = self.zBasis.y; output[10] = self.zBasis.z; output[11] = 0.0;
+    output[12] = self.origin.x; output[13] = self.origin.y; output[14] = self.origin.z; output[15] = 1.0;
+    
     return output;
-  }
+end
 
-  --[[*
-   *  Writes the 4x4 Matrix object to a 16 element row-major float
-   * or double array.
-   *
-   * Returns a pointer to the same data.
-   --]]
-  template<typename T>
-  T* toArray4x4(T* output) const {
-    output[0]  = xBasis.x; output[1]  = xBasis.y; output[2]  = xBasis.z; output[3]  = 0.0f;
-    output[4]  = yBasis.x; output[5]  = yBasis.y; output[6]  = yBasis.z; output[7]  = 0.0f;
-    output[8]  = zBasis.x; output[9]  = zBasis.y; output[10] = zBasis.z; output[11] = 0.0f;
-    output[12] = origin.x; output[13] = origin.y; output[14] = origin.z; output[15] = 1.0f;
-    return output;
-  }
+--[[
+  Convert a 4x4 Matrix object to a 16 element row-major float array. 
+--]]
+Matrix_t.toArray4x4 = function(self, ct)
+  ct = ct or float16_t; 
+  local output = ct();
+  self:copyToArray4x4(output);
+  
+  return output;
+end
 
-  --[[*
-   *  Convert a 4x4 Matrix object to a 16 element row-major float array.
-   *
-   * Returns a FloatArray struct to avoid dynamic memory allocation.
-   --]]
-  FloatArray toArray4x4() const {
-    FloatArray output;
-    toArray4x4((float*)output);
-    return output;
-  }
-
-
-
-
---]===]
 
 return {
   Vector = Vector_t,
+  Matrix = Matrix_t,
 }
 

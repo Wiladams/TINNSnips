@@ -1,4 +1,4 @@
-package.path = package.path.."../../?.lua"
+package.path = package.path.."../?.lua"
 
 local LeapMath = require("LeapMath");
 
@@ -14,5 +14,8 @@ print("Z Axis: ", Vector.zAxis);
 xplusy = Vector.xAxis + Vector.yAxis;
 print("X + Y: ", xplusy);
 
-local vec2 = Vector.new(2,3,5)
-print("NEG: ", -vec2)
+local v2 = Vector.new(2,3,5)
+print("NEG: ", -v2)
+
+print("INDEX Access")
+print(v2[0], v2[1], v2[2]);
