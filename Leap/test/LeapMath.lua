@@ -1,23 +1,9 @@
 --[[
-This derivative work had the following copyright.
+  These are some basic vector and matrix math functions
 
-*****************************************************************************\
-* Copyright (C) 2012-2013 Leap Motion, Inc. All rights reserved.               *
-* Leap Motion proprietary and confidential. Not for distribution.              *
-* Use subject to the terms of the Leap Motion SDK Agreement available at       *
-* https://developer.leapmotion.com/sdk_agreement, or another agreement         *
-* between Leap Motion and you, your company or other organization.             *
-\*****************************************************************************
 --]]
 
---[[
- * The Leap software employs a right-handed Cartesian coordinate system.
- * Values given are in units of real-world millimeters. The origin is centered
- * at the center of the Leap device. The x- and z-axes lie in the horizontal
- * plane, with the x-axis running parallel to the long edge of the device.
- * The y-axis is vertical, with positive values increasing upwards.
- * The z-axis has positive values increasing away from the computer screen.
- --]]
+
  
 local ffi = require("ffi");
 
@@ -31,6 +17,11 @@ local RAD_TO_DEG  = 57.295779513;
 local Epsilon = 0.0000001;			-- A fairly small number for comparisons
 
 
+-- These are used to represent a matrix as a flat array
+local float16_t = ffi.typeof("float[16]")
+local double16_t = ffi.typeof("double[16]")
+
+
 --[[*
  The Vector struct represents a three-component mathematical vector or point
  such as a direction or position in three-dimensional space.
@@ -38,10 +29,23 @@ local Epsilon = 0.0000001;			-- A fairly small number for comparisons
 
 local Vector_t = {}
 local Vector_mt = {
-  __index = Vector_t;
+  __index = function(self, key)
+    if type(key) == "number" then
+      if key == 0 then
+        return self.x;
+      elseif key == 1 then
+        return self.y;
+      elseif key == 2 then
+        return self.z;
+      end
+      return nil;
+    end
+
+    return Vector_t[key];
+  end;
 
   __tostring = function(self)
-    return string.format("Vector(%3.2f, %3.4f, %3.4f)", self.x, self.y, self.z)
+    return string.format("{%3.3f, %3.3f, %3.3f}", self.x, self.y, self.z);
   end;
 
 
@@ -72,27 +76,35 @@ local Vector_mt = {
   end;
 }
 
-Vector_t.new = function (x, y, z)
-  x = x or 0;
-  y = y or 0;
-  z = z or 0;
+Vector_t.new = function (...)
+  local nargs = select("#",...);
 
-  local obj = {
-    x=x;    -- The horizontal component.
-    y=y;    -- The vertical component.
-    z=z;    -- The depth component.
-  }
+  local obj = {x=0,y=0,z=0}
+
+  if nargs == 3 then
+    obj.x = select(1, ...);
+    obj.y = select(2, ...);
+    obj.z = select(3, ...);
+  elseif nargs == 1 then
+    local arg1 = select(1,...)
+    if getmetatable(arg1) == Vector_mt then
+      -- Copy constructor for vector
+      obj.x = arg1.x;
+      obj.y = arg1.y;
+      obj.z = arg1.z;
+    elseif type(arg1) == "number" then
+      obj.x = arg1;
+      obj.y = arg1;
+      obj.z = arg1;
+    end 
+  end
 
   setmetatable(obj, Vector_mt)
 
   return obj;
 end
 
---[=[
-  --[[* Copies the specified Vector. --]]
-  Vector(const Vector& vector) :
-    x(vector.x), y(vector.y), z(vector.z) {}
---]=]
+
 
 Vector_t.zero = Vector_t.new(0,0,0); --[[ The zero vector: (0, 0, 0) --]]
 
@@ -195,7 +207,7 @@ Vector_t.mul = function(self, s)
   return self;
 end
 
-Vector_t.mul = function(self, s)
+Vector_t.div = function(self, s)
   self.x = self.x / s;
   self.y = self.y / s;
   self.z = self.z / s;
@@ -213,60 +225,11 @@ end
 
 
 
---[===[
-
-  --[[*
-   *  Index vector components numerically.
-   * Index 0 is x, index 1 is y, and index 2 is z.
-   * @returns The x, y, or z component of this Vector, if the specified index
-   * value is at least 0 and at most 2; otherwise, returns zero.
-   --]]
-  float operator[](unsigned int index) const {
-    return index < 3 ? (&x)[index] : 0.0f;
-  }
-
-  --[[* Cast the vector to a float array. --]]
-  const float* toFloatPointer() const {
-    return &x; --[[ Note: Assumes x, y, z are aligned in memory. --]]
-  }
-
-  --[[*
-   *  Convert a Leap::Vector to another 3-component Vector type.
-   *
-   * The specified type must define a constructor that takes the x, y, and z
-   * components as separate parameters.
-   --]]
-  template<typename Vector3Type>
-  const Vector3Type toVector3() const {
-    return Vector3Type(x, y, z);
-  }
-
-  --[[*
-   *  Convert a Leap::Vector to another 4-component Vector type.
-   *
-   * The specified type must define a constructor that takes the x, y, z, and w
-   * components as separate parameters. (The homogeneous coordinate, w, is set
-   * to zero by default, but you should typically set it to one for vectors
-   * representing a position.)
-   --]]
-  template<typename Vector4Type>
-  const Vector4Type toVector4(float w=0.0f) const {
-    return Vector4Type(x, y, z, w);
-  }
---]===]
 
 
 --[[
-*
- *  The FloatArray struct is used to allow the returning of native float arrays
- * without requiring dynamic memory allocation.  It represents a matrix
- * with a size up to 4x4.
- --]]
-
-local float16_t = ffi.typeof("float[16]")
-local double16_t = ffi.typeof("double[16]")
-
-
+  Matrix Representation
+--]]
 
 local Matrix_t = {}
 local Matrix_mt = {
@@ -329,11 +292,9 @@ Matrix_t.new = function(a,b,c,  d,e,f,  g,h,i,  x,y,z)
   return obj; 
 end
 
-  --[[*
-   *  Returns the identity matrix specifying no translation, rotation, and scale.
-   *
-   * @returns The identity matrix.
-   --]]
+--[[
+  Returns the identity matrix specifying no translation, rotation, and scale.
+--]]
 Matrix_t.identity = Matrix_t.new(1,0,0,  0,1,0,  0,0,1,  0,0,0);
 
   --[[*
@@ -564,7 +525,12 @@ end
 
 
 return {
-  Vector = Vector_t,
-  Matrix = Matrix_t,
+  vec3_t = Vector_t,
+  vec3_mt = Vector_mt,
+  vec3 = Vector_t.new,
+
+  mat4_t = Matrix_t,
+  mat4_mt = Matrix_mt,
+  mat4 = Matrix_t.new,
 }
 
