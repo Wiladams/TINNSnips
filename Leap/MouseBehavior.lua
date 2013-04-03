@@ -32,13 +32,7 @@ MouseBehavior_mt = {
 	__index = MouseBehavior_t;
 }
 
-MouseBehavior = function(scape, width, height)
-	local sensecfg = loadfile("sensor.cfg");
-	if not sensecfg then
-		return nil, "could not load sensor.cfg. run: tinn mousetrain.lua"
-	end
-	sensecfg = sensecfg();
-	
+MouseBehavior = function(scape, width, height)	
 
 	local obj = {
 		sensemin = sensecfg.sensemin;
