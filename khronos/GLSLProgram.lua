@@ -413,7 +413,7 @@ function CreateGLSLProgramFromFiles(fragname, vertname)
 	if fragname then
 		fp = io.open(fragname, "r");
 		fragtext = fp:read("*all");
-		print(fragtext);
+		--print(fragtext);
 		fp:close();
 	end
 

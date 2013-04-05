@@ -2,9 +2,12 @@
 
 package.path = package.path..";../?.lua"
 
-local vector_math = require("vector_math");
+local ffi = require ("ffi");
 
-local vec3 = vector_math.vec3;
+local math_vector = require("math_vector");
+
+local vec3 = math_vector.vec3;
+local dvec3 = math_vector.dvec3;
 
 v1 = vec3(1,7,30);
 print("V1: ", v1);
@@ -32,3 +35,8 @@ local yaxis = vec3(0,1,0);
 local zaxis = xaxis:cross(yaxis);
 
 print("xaxis:cross(yaxis): ", zaxis);
+
+print("zaxis elementType: ", zaxis:elementType());
+
+d1 = dvec3(23, 24, 25);
+print("d1 type, size: ", d1:elementType(), #d1, ffi.sizeof(d1));
