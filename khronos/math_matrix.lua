@@ -1,6 +1,25 @@
 -- math_matrix.lua
 
+--[[
+	The math_matrix represents a minimal set of routines
+	to support both vector and matrix types, and operations
+	between them.
+
+	The make_matrix_kind() creates types of matrices and vectors
+	with given sizes, dimensions and element types.
+
+	The operations available here may not be the fastest implementations 
+	available, but they are verified to be correct and stable for many 
+	common cases.
+
+	In addition to core operations, there are some convenience operators
+	as well.
+--]]
+
 local ffi = require "ffi"
+
+local pow = math.pow;
+local sqrt = math.sqrt;
 
 -- The catalog of matrix kinds
 -- Each time a kind is created, it is stored
@@ -37,6 +56,7 @@ local swizzlit = function(val)
 
 	return closure;
 end
+
 
 local function make_matrix_kind(ct, rows, columns)
 --print("make_matrix_kind: ", ct, rows, columns);
@@ -98,6 +118,7 @@ local function make_matrix_kind(ct, rows, columns)
 		end,
 
 
+		-- Element Accessors
 		get = function(self, row, col)
 			return self.data[(col * rows) + row];
 		end,
@@ -166,15 +187,118 @@ local function make_matrix_kind(ct, rows, columns)
 			return res;
 		end,
 
-		-- Arithmetic operators
-		add = function(self, other)
-			local obj = ffi.new(ffi.typeof(self));
+		transpose = function(self)
+			local reskind = make_matrix_kind(ct, columns, rows);
+			local res = reskind();
 
-			for i=0,nelems-1 do 
-				obj.data[i] = self.data[i] + other.data[i];
+			for col=0,columns-1 do
+				res:setRow(col, self[col])
 			end
 
-			return obj; 
+			return res;
+		end,
+
+		--[[
+			Arithmetic operators
+		--]]
+		addSelf = function(self, other)
+			for i=0,nelems-1 do 
+				self.data[i] = self.data[i] + other.data[i];
+			end
+
+			return self; 
+		end,
+
+		subSelf = function(self, other)
+			for i=0,nelems-1 do 
+				self.data[i] = self.data[i] - other.data[i];
+			end
+
+			return self; 
+		end,
+
+		sum = function(self)
+			local res = 0;
+			for i=0,nelems do
+				res = res + self.data[i];
+			end
+			return res;
+		end,
+
+		unmSelf = function(self)
+			for i=0,nelems-1 do
+				self.data[i] = -self.data[i];
+			end
+		end,
+
+
+		--[[
+			Linear Algebra
+		--]]
+		cofactor = function(self, row, column)
+			if columns < 2 or rows < 2 then
+				return false, "too small"
+			end
+
+			local reskind = make_matrix_kind(ct, rows - 1, columns-1)
+			local res = reskind();
+
+			local rowoffset = 0;
+			local coloffset = 0;
+
+--print("cofactor: ", res:rows(), res:columns());
+
+			for rowidx =0,rows-2 do
+				if rowoffset == row then
+					rowoffset = rowoffset + 1;
+				end
+
+				local coloffset = 0;
+				for colidx=0,columns-2 do
+					if coloffset == column then
+						coloffset = coloffset + 1;
+					end
+					
+					res:set(rowidx, colidx, self:get(rowoffset, coloffset));
+
+					coloffset = coloffset + 1;
+				end
+				rowoffset = rowoffset + 1;
+			end
+
+			return res
+		end,
+		
+		cofactors = function(self)
+			local mom = self:minors();
+			
+			-- apply checkerboard pattern of negation
+			for i=0,nelems-1 do
+				mom.data[i] = mom.data[i]* pow(-1, i);
+			end
+
+			return mom;
+		end;
+
+		-- Retrieve the matrix that is 2 orders smaller
+		-- than the current matrix
+		centerfactor = function(self)
+			-- This will only work if order is
+			-- 4 or greater
+			if rows < 4 or columns < 4 then
+				return false, "order is too small"
+			end
+
+			local reskind = make_matrix_kind(ct, rows-2, columns-2);
+			local res = reskind();
+
+			for row = 1, rows-2 do
+				for column = 1, columns-2 do
+					res:set(row-1, column-1, self:get(row, column));
+				end
+			end
+
+			return res;
 		end,
 
 		cross = function(self, other)
@@ -190,13 +314,72 @@ local function make_matrix_kind(ct, rows, columns)
 			return res;
 		end,
 
-		-- Linear Algebra
+		determinant = function(self)
+			-- For cases smaller than 4
+			-- use straight forward methods
+			if rows == 1 and columns == 1 then
+				return self.data[0]
+			end
+
+			if rows == 2 and columns == 2 then
+				return self:get(0,0)*self:get(1,1) - self:get(0,1)*self:get(1,0);
+			end
+
+			if rows == 3 and columns == 3 then
+				return self:get(0,0)*self:get(1,1)*self:get(2,2) +
+				self:get(0,1)*self:get(1,2)*self:get(2,0) +
+				self:get(0,2)*self:get(1,0)*self:get(2,1) -
+				self:get(2,0)*self:get(1,1)*self:get(0,2) -
+				self:get(2,1)*self:get(1,2)*self:get(0,0) -
+				self:get(2,2)*self:get(1,0)*self:get(0,1);
+			end
+
+			-- Using the generalized formula
+			local det = 0;
+			for col=0,columns-1 do
+				det = det + pow(-1,col)*self:get(0,col)*self:cofactor(0,col):determinant();
+			end
+
+			return det;
+		end,
+
 		dot = function(self, other)
 			return dot(self, other, nelems)
 		end,
 
+		-- The matrix of determinants for each cofactor of the matrix
+		minors = function(self)
+			local mom = mat_kind();
+			for row=0,rows-1 do
+				for col=0,columns-1 do
+					mom:set(row,col,self:cofactor(row,col):determinant());
+				end
+			end
+
+			return mom;
+		end,
+
+		-- inverse * self == identity
+		inverse = function(self)
+			-- OPTIMIZATION
+			-- since the minors already calculate determinants
+			-- perhaps those can be reused here instead of calculating
+			-- the inverse twice
+
+			local det = self:determinant();
+			if det == 0 then
+				return false, "determinant == 0"
+			end
+
+			-- minors put determinant of cofactor into each element position
+			-- cofactors apply checkerboard of negation to minors
+			-- calculate adjoint/adjugate/transpose
+			-- multiply by inverse of determinant
+			return self:cofactors():transpose() * tonumber(1/det);
+		end,
+
 		length = function(self)
-			return math.sqrt(dot(self, self, nelems));
+			return sqrt(dot(self, self, nelems));
 		end,
 
 		lengthSquared = function(self)
@@ -211,6 +394,12 @@ local function make_matrix_kind(ct, rows, columns)
 
 
 		mul = function(self, other)
+		--print("MUL: ", type(self), type(other));
+
+			if type(self) == "number" then
+				self, other = other, self
+			end
+		--print("MUL: ", type(self), type(other));
 
 			if type(other) == "number" then
 				local res = mat_kind();
@@ -230,6 +419,9 @@ local function make_matrix_kind(ct, rows, columns)
 				for col=0,other:columns()-1 do
 					-- calculate a dot product between each
 					-- row of self and column of other
+					-- don't use the 'dot()' function here as it would need
+					-- a contiguous array for each row, which would require
+					-- a copy
 					local dotprod = 0;
 					for k=0,self:columns()-1 do
 						dotprod = dotprod + self:get(row,k)*other:get(k,col);
@@ -240,23 +432,6 @@ local function make_matrix_kind(ct, rows, columns)
 
 			return res; 
 		end,
-
-		sub = function(self, other)
-			local obj = ffi.new(ffi.typeof(self));
-
-			for i=0,nelems-1 do 
-				obj.data[i] = self.data[i] - other.data[i];
-			end
-
-			return obj; 
-		end,
-
-		unm = function(self)
-			for i=0,nelems-1 do
-				self.data[i] = -self.data[i];
-			end
-		end,
-
 
 
 		["tostring"] = function(self)
@@ -283,7 +458,7 @@ local function make_matrix_kind(ct, rows, columns)
 			local obj = ffi.new(ct);
 
 --print("mat_mt.__new(): ", nargs);
-
+			-- default constructor
 			if nargs < 1 then
 				return obj
 			end
@@ -308,14 +483,16 @@ local function make_matrix_kind(ct, rows, columns)
 			return obj;
 		end;
 
-		__add = function(self, other) return mat_t.add(self, other); end;
+		__add = function(self, other) return mat_kind():addSelf(other); end;
 		__mul = function(self, other) return mat_t.mul(self, other); end;
-		__sub = function(self, rhs) return mat_t.sub(self, rhs); end;
-		__unm = function(self) return mat_t.unm(self); end;
+		__sub = function(self, other) return mat_kind():subSelf(other); end;
+		__unm = function(self) return mat_kind().unmSelf(); end;
 
 		__tostring = function(self) return mat_t.tostring(self); end;
 
 		__index = function(self, key)
+			--print("INDEX: ", key, rows, columns);
+			
 			if type(key) == "number" then
 				-- If this matrix is representing a columnar
 				-- or row vector, then just return a standard
@@ -325,7 +502,7 @@ local function make_matrix_kind(ct, rows, columns)
 				end
 
 				-- Return a pointer to the specified column
-				return ffi.cast(column_kind_ptr, self:asElementPointer() + key*rows);
+				return ffi.cast(column_kind_ptr, self:asElementPointer() + key*rows)[0];
 				--return self:asElementPointer() + key*rows;
 			elseif  mat_t[key] then
 				return mat_t[key];
@@ -357,7 +534,9 @@ end
 
 return {
 	make_matrix_kind = make_matrix_kind;
+	
 
+	mat2 = make_matrix_kind(ffi.typeof("double"), 2,2);
 	mat3 = make_matrix_kind(ffi.typeof("double"), 3,3);
 	mat4 = make_matrix_kind(ffi.typeof("double"), 4,4);
 

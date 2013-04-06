@@ -7,6 +7,8 @@ local ffi = require("ffi");
 local math_matrix = require("math_matrix");
 local mat4 = math_matrix.mat4;
 local mat3 = math_matrix.mat3;
+local mat2 = math_matrix.mat2;
+
 local vec4 = math_matrix.vec4;
 local vec3 = math_matrix.vec3;
 
@@ -42,6 +44,180 @@ local test_normal = function()
 
 	print("axis normal")
 	print(math_matrix.PlaneNormal(vec3(1,0,0), vec3(0,1,0), vec3(0,0,1)));
+end
+
+local test_mat2 = function()
+	local m1 = mat2({{3,1},{5,2}})
+	local d = math_matrix.mat2_det(m1);
+
+	print("m1")
+	print(m1);
+	print("DET: ", d);
+	
+end
+
+local test_cofactor = function()
+	local m1 = mat3({
+		{1,2,3},
+		{4,5,6},
+		{7,8,9}});
+
+	print("cofactor: 0,0")
+	print(m1:cofactor(0,0));
+
+end
+
+local test_determinant = function()
+	local A = mat3({
+		{-2,2,3},
+		{-1,1,3},
+		{2,0,-1}
+		});
+
+	print("determinant")
+	print(A:determinant());
+
+	local mat5 = math_matrix.make_matrix_kind(ffi.typeof("float"), 5, 5);
+	local B = mat5({
+		{1,0,3,5,1},
+		{0,1,5,1,0},
+		{0,4,0,0,2},
+		{2,3,1,2,0},
+		{1,0,0,1,1}
+		})
+
+	print("fifth order")
+	print(B);
+	print("B DETERMINANT")
+	print(B:determinant());
+
+---[[]
+	local cof00 = mat4({
+		{1,0,3,5},
+		{0,1,5,1},
+		{0,4,0,0},
+		{2,3,1,2}
+		})
+	print("cof00 DETERMINANT")
+	print(cof00:determinant());
+	-- 140
+--]]
+
+	local cof01 = mat4({
+		{0,3,5,1},
+		{1,5,1,0},
+		{4,0,0,2},
+		{3,1,2,0}
+		})
+	print("cof01 DETERMINANT")
+	print(cof01:determinant());
+	-- 170
+---[[
+	local cof10 = mat4({
+		{0,1,5,1},
+		{0,4,0,0},
+		{2,3,1,2},
+		{1,0,0,1}
+		})
+	print("cof10 DETERMINANT")
+	print(cof10:determinant());	--print("centerfactor");
+	-- -4
+--]]
+---[[
+	local cof11 = mat4({
+		{1,5,1,0},
+		{4,0,0,2},
+		{3,1,2,0},
+		{0,0,1,1}
+		})
+	print("cof11 DETERMINANT")
+	print(cof11:determinant());	--print("centerfactor");
+	-- -64
+--]]
+
+	--print(B:centerfactor());
+	
+	--print("CENTER DETERMINANT")
+	--print(B:centerfactor():determinant());
+
+	--print("DETERMINANT");
+	--local cof44 = B:cofactor(4,4);
+	--print("cof44");
+	--print(cof44);
+	--print("cof44 DET")
+	--print(cof44:determinant());
+
+
+--[[
+	local C = mat3({
+		{1,3,2},
+		{4,1,3},
+		{2,5,2}
+		})
+	print("C DETERMINANT")
+	print(C:determinant());
+
+
+	local D = mat4({
+		{3,2,0,1},
+		{4,0,1,2},
+		{3,0,2,1},
+		{9,2,3,1}
+		})
+	print("D DETERMINANT")
+	print(D:determinant());
+--]]
+end
+
+local test_inverse = function()
+	local A = mat3({
+		{3,0,2},
+		{2,0,-2},
+		{0,1,1}
+		});
+
+	print("A");
+	print(A);
+
+	print("DET")
+	print(A:determinant());
+
+	local mom = A:minors();
+	print("MOM");
+	print(mom);
+
+	local cof = A:cofactors();
+	print("COF");
+	print(cof);
+
+	print("INVERSE");
+	local inv = A:inverse();
+	print(inv);
+
+	print("CONFIRM - IDENTITY")
+	print(inv*A);
+
+end
+
+local test_transpose = function()
+	local D = mat4({
+		{3,2,0,1},
+		{4,0,1,2},
+		{3,0,2,1},
+		{9,2,3,1}
+		})
+	print("D ")
+	print(D);
+
+	local d0 = D[0];
+	print("COL 0: ", d0:rows(), d0:columns());
+	print(d0);
+
+
+	--print("D[0][0]: ");
+	--print("TYPEOF: ", type(d0[0]));
+	print("TRANSPOSE")
+	print(D:transpose());
 end
 
 
@@ -193,7 +369,13 @@ local test_swizzling = function()
 end
 
 --test_vec();
-test_normal();
+--test_normal();
+--test_cofactor();
+--test_determinant();
+test_inverse();
+--test_transpose();
+
+--test_mat2();
 --test_matrix();
 --test_matrix1();
 --test_matrix2();
