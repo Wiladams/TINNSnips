@@ -37,7 +37,7 @@ local GLWindow = require ("khronos.GLWindow");
 local canvasWidth = 1024
 local canvasHeight = 768
 
-local MainWindow = nil;
+MainWindow = nil;
 
 
 
@@ -209,20 +209,20 @@ print("Exiting Window Loop")
 	stop();
 end
 
-
-local main = function()
+local main = function(params)
+	params = params or {}
+	params.FrameRate = params.FrameRate or 30;
 
 	MainWindow = GLWindow({
 		Title = "View3D",
 		Extent = {canvasWidth,canvasHeight},
-		FrameRate = 10,
+		FrameRate = params.FrameRate,
 
 		OnMouseDelegate = OnKeyMouse,
 		OnKeyDelegate = OnKeyMouse,
 		OnWindowResizedDelegate = OnWindowResized,
 		OnWindowResizingDelegate = OnWindowResizing,
 	})
-
 
 	OnWindowResized(canvasWidth, canvasHeight);
 

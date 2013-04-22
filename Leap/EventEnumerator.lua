@@ -41,7 +41,9 @@ local EventEnumerator = function(frameemitter, filterfunc, param)
 				for _,gesture in ipairs(frame.gestures) do
 					addevent(gesture);
 				end
-			end						
+			end		
+			
+			yield();				
 		end
 
 		return eventqueue:Dequeue();

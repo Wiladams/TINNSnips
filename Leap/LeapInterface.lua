@@ -23,17 +23,17 @@ local LeapInterface_mt = {
 local LeapInterface = function(params)
 	params = params or {url = "ws://127.0.0.1:6437/", enableGestures=true}
 
-	print("LeapInterface(): ",  params.url);
+--print("LeapInterface(): ",  params.url);
 
 	-- establish a TCP connection to the intended service
 	local urlparts = UrlParser.parse(params.url or "ws://127.0.0.1:6437/", {port="80", path="/", scheme="ws"});
 
-print("URL Parts: ", urlparts.host, urlparts.port);
+--print("URL Parts: ", urlparts.host, urlparts.port);
 
 	local stream, err = NetStream.Open(urlparts.host, urlparts.port);
 
 	if not stream then
-print("LeapInterface(), NETSTREAM: ", stream, err);
+--print("LeapInterface(), NETSTREAM: ", stream, err);
 		return false, err
 	end
 
@@ -62,7 +62,6 @@ print("LeapInterface(), NETSTREAM: ", stream, err);
 
 	return obj;
 end
-
 
 LeapInterface_t.EnableGestures = function(self)
 	self.SocketStream:WriteFrame([[{"enableGestures": true}]], 1, 1, true);
