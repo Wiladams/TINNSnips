@@ -13,14 +13,18 @@ local SecurityPackage = sspi.SecurityPackage;
 
 
 
-local function CreateCreds()
-	local package, err = SecurityPackage:FindPackage(sspi.schannel.UNISP_NAME);
+local function CreateCreds(packageName, protocol, flags)
+    packageName = packageName or sspi.schannel.UNISP_NAME
+	protocol = protocol or ffi.C.SP_PROT_TLS1_CLIENT;
+    flags = flags or bor(ffi.C.SCH_CRED_AUTO_CRED_VALIDATION, ffi.C.SCH_CRED_USE_DEFAULT_CREDS);
+    
+    local package, err = SecurityPackage:FindPackage(packageName);
 	
 	local authData = ffi.new("SCHANNEL_CRED");
 
 	authData.dwVersion = ffi.C.SCHANNEL_CRED_VERSION;
-	authData.grbitEnabledProtocols = ffi.C.SP_PROT_TLS1_CLIENT;
-	authData.dwFlags = bor(ffi.C.SCH_CRED_AUTO_CRED_VALIDATION, ffi.C.SCH_CRED_USE_DEFAULT_CREDS);
+	authData.grbitEnabledProtocols = protocol;
+	authData.dwFlags = flags;
 
 	local creds, err = package:CreateCredentials(ffi.C.SECPKG_CRED_OUTBOUND, authData);
 

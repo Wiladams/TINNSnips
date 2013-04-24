@@ -81,9 +81,9 @@ local main = function()
 	go.OnSwipeEnd = OnSwipeEnd;
 
 	-- Circles	
-	--go.OnCircleBegin = OnCircleBegin;
-	--go.OnCircling = OnCircling;
-	--go.OnCircleEnd = OnCircleEnd;
+	go.OnCircleBegin = OnCircleBegin;
+	go.OnCircling = OnCircling;
+	go.OnCircleEnd = OnCircleEnd;
 
 	-- Taps
 	--go.OnKeyTap = OnKeyTap;

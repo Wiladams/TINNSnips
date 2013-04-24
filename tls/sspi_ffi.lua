@@ -2752,16 +2752,8 @@ return {
 --[[
 	Finishing up Security.h
 
-#if defined(SECURITY_WIN32) || defined(SECURITY_KERNEL)
-#include <secext.h>
-end
-
-//
-// Include the error codes:
-//
-
-#if ISSP_LEVEL == 16
-#include <issper16.h>
+if SECURITY_WIN32 or SECURITY_KERNEL then
+    require("secext");
 end
 
 --]]
