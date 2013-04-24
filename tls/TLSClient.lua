@@ -36,7 +36,6 @@ local IO_BUFFER_SIZE = 10000;
 
 local function ClientHandshakeLoop(Socket, phCreds, phContext, fDoInitialRead, pExtraData)
 
-
 	local OutBuffer = ffi.new("SecBufferDesc"); 
 	local InBuffer = ffi.new("SecBufferDesc");
     local InBuffers = ffi.new("SecBuffer[2]");
@@ -58,14 +57,10 @@ local function ClientHandshakeLoop(Socket, phCreds, phContext, fDoInitialRead, p
     -- Allocate data buffer.
     local IoBuffer = ffi.new("uint8_t[?]", IO_BUFFER_SIZE);
     if (IoBuffer == nil) then 
-    	print("**** Out of memory (1)"); 
-    	return SEC_E_INTERNAL_ERROR; 
+    	return false, SEC_E_INTERNAL_ERROR; 
     end
 
     local cbIoBuffer = 0;
-
-
-
 
     -- Loop until the handshake is finished or an error occurs.
     local scRet = SEC_I_CONTINUE_NEEDED;
@@ -74,26 +69,22 @@ local function ClientHandshakeLoop(Socket, phCreds, phContext, fDoInitialRead, p
     while( scRet == SEC_I_CONTINUE_NEEDED        or
            scRet == SEC_E_INCOMPLETE_MESSAGE     or
            scRet == SEC_I_INCOMPLETE_CREDENTIALS ) do
-
+::whiletop::
         if(0 == cbIoBuffer or scRet == SEC_E_INCOMPLETE_MESSAGE) then -- Read data from server.
         
             if (fDoRead) then
                 cbData, err = Socket:Receive(IoBuffer + cbIoBuffer, IO_BUFFER_SIZE - cbIoBuffer, 0 );
                 if not cbData and (err == SOCKET_ERROR) then
-                    print(string.format("**** Error %d reading data from server\n",err));
+                    --print("**** Error reading data from server: ",err);
                     scRet = SEC_E_INTERNAL_ERROR;
                     break;
                 elseif (cbData == 0) then
-                    print("**** Server unexpectedly disconnected");
+                    --print("**** Server unexpectedly disconnected");
                     scRet = SEC_E_INTERNAL_ERROR;
                     break;
                 end
-                print("#### bytes of handshake data received: ", cbData);
+                --print("#### bytes of handshake data received: ", cbData);
                 
-                if(fVerbose) then
-                	PrintHexDump(cbData, IoBuffer + cbIoBuffer); 
-                	print(); 
-                end
                 cbIoBuffer = cbIoBuffer + cbData;
             else
               fDoRead = true;
@@ -155,18 +146,14 @@ local function ClientHandshakeLoop(Socket, phCreds, phContext, fDoInitialRead, p
             
                 cbData, err = Socket:Send(OutBuffers[0].pvBuffer, OutBuffers[0].cbBuffer, 0 );
                 if(not cbData and err == SOCKET_ERROR or cbData == 0) then
-                    print( "**** Error sending data to server (2): ", err);
+                    --print( "**** Error sending data to server (2): ", err);
                     --DisplayWinSockError( WSAGetLastError() );
                     SecurityInterface.FreeContextBuffer(OutBuffers[0].pvBuffer);
                     SecurityInterface.DeleteSecurityContext(phContext);
-                    return SEC_E_INTERNAL_ERROR;
+                    return false, SEC_E_INTERNAL_ERROR;
                 end
 
-                print("## bytes of handshake data sent: ", cbData);
-                if(fVerbose) then
-                	PrintHexDump(cbData, OutBuffers[0].pvBuffer); 
-                	print(); 
-                end
+                --print("## bytes of handshake data sent: ", cbData);
 
                 -- Free output buffer.
                 SecurityInterface.FreeContextBuffer(OutBuffers[0].pvBuffer);
@@ -174,12 +161,10 @@ local function ClientHandshakeLoop(Socket, phCreds, phContext, fDoInitialRead, p
             end
         end
 
-
-
         -- If InitializeSecurityContext returned SEC_E_INCOMPLETE_MESSAGE,
         -- then we need to read more data from the server and try again.
         if(scRet == SEC_E_INCOMPLETE_MESSAGE) then
-        	--continue;
+        	goto whiletop; -- continue
         else
 
 
@@ -195,10 +180,8 @@ local function ClientHandshakeLoop(Socket, phCreds, phContext, fDoInitialRead, p
             if(InBuffers[1].BufferType == ffi.C.SECBUFFER_EXTRA) then
                 pExtraData.pvBuffer = ffi.new("uint8_t[?]", InBuffers[1].cbBuffer);
 
-                if(pExtraData.pvBuffer == nil) then
-                
-                	print("**** Out of memory (2)"); 
-                	return SEC_E_INTERNAL_ERROR; 
+                if(pExtraData.pvBuffer == nil) then                
+                	return false, SEC_E_INTERNAL_ERROR; 
                 end
 
                 ffi.copy( pExtraData.pvBuffer,
@@ -326,24 +309,17 @@ local function PerformClientHandshake(Socket, phCreds, pszServerName)
         end
 
         print("handshake bytes sent: ", cbData);
-        if (fVerbose) then 
-       		--PrintHexDump(cbData, OutBuffers[0].pvBuffer); 
-       		print(); 
-       	end
 
         SecurityInterface.FreeContextBuffer(OutBuffers[0].pvBuffer); -- Free output buffer.
         OutBuffers[0].pvBuffer = nil;
     end
-
-    print("phNewContext: ", phNewContext);
-    print("pfContextAttr: ", string.format("%0x",pfContextAttr[0]));
     
 	local pExtraData = ffi.new("SecBuffer");
 
-    local res =  ClientHandshakeLoop(Socket, phCreds, phNewContext, true, pExtraData);
+    local success, err =  ClientHandshakeLoop(Socket, phCreds, phNewContext, true, pExtraData);
     
-    if res ~= 0 then
-        return false, res;
+    if not success then
+        return false, err;
     end
 
     return phNewContext;
@@ -520,21 +496,16 @@ local function DecryptReceive( Socket, phCreds, phContext, pbIoBuffer,cbIoBuffer
             end
         end
 
-        -- Display the decrypted data.
+        -- Return a decrypted data packet.
         if(pDataBuffer) then
             length = pDataBuffer.cbBuffer;
             if ( length>0 ) then -- check if last two chars are CR LF
+ 
                 buff = pDataBuffer.pvBuffer; -- printf( "n-2= %d, n-1= %d \n", buff[length-2], buff[length-1] );
-                print("Decrypted data length: ", length);
-                print(ffi.string(buff, length)); 
                 
-                --if (buff[length-2] == 13 and buff[length-1] == 10 ) then
-                --    break; -- printf("Found CRLF\n");
-                --end
-            end
+                break;
+           end
         end
-
-
 
         -- Move any "extra" data to the input buffer.
         if(pExtraBuffer) then
@@ -544,24 +515,26 @@ local function DecryptReceive( Socket, phCreds, phContext, pbIoBuffer,cbIoBuffer
             cbIoBuffer = 0;
         end
 
---[[
         -- The server wants to perform another handshake sequence.
-        if(scRet == SEC_I_RENEGOTIATE) 
-        {
-            printf("Server requested renegotiate!\n");
-            scRet = ClientHandshakeLoop( Socket, phCreds, phContext, FALSE, &ExtraBuffer);
-            if(scRet != SEC_E_OK) return scRet;
+        if (scRet == SEC_I_RENEGOTIATE) then
+        
+            print("Server requested renegotiate!");
 
-            if(ExtraBuffer.pvBuffer) -- Move any "extra" data to the input buffer.
-            {
-                MoveMemory(pbIoBuffer, ExtraBuffer.pvBuffer, ExtraBuffer.cbBuffer);
+            scRet = ClientHandshakeLoop( Socket, phCreds, phContext, false, ExtraBuffer);
+            if (scRet ~= SEC_E_OK) then
+                return false, scRet;
+            end
+
+
+            if(ExtraBuffer.pvBuffer) then 
+                -- Move any "extra" data to the input buffer.
+                ffi.copy(pbIoBuffer, ExtraBuffer.pvBuffer, ExtraBuffer.cbBuffer);
                 cbIoBuffer = ExtraBuffer.cbBuffer;
-            }
-        }
---]]
+            end
+        end
     end
 
-    return true;
+    return buff, length;
 end
 
 
@@ -593,11 +566,21 @@ ClientSession.new = function(sock, serverName)
     local Sizes = ffi.new("SecPkgContext_StreamSizes");
     local scRet = SecurityInterface.QueryContextAttributesA( phContext, ffi.C.SECPKG_ATTR_STREAM_SIZES, Sizes );
 
+    local ioLength = Sizes.cbHeader  +  Sizes.cbMaximumMessage  +  Sizes.cbTrailer;
+
+print("SIZES");
+print("Header: ", Sizes.cbHeader);
+print("MaxMessage: ", Sizes.cbMaximumMessage);
+print("Trailer: ", Sizes.cbTrailer);
+
+
     local obj = {
         Credentials = creds;
         Socket = sock;
         Context = phContext;
         Sizes = Sizes;
+        IoBufferLength = ioLength;
+        IoBuffer = ffi.new("uint8_t[?]", ioLength);
     }
     setmetatable(obj, ClientSession_mt);
 
@@ -606,12 +589,12 @@ end
 
 ClientSession.Send = function(self, message)
     local maxbytes = math.min(self.Sizes.cbMaximumMessage, #message);
-    local cbIoBufferLength = self.Sizes.cbHeader  +  self.Sizes.cbMaximumMessage  +  self.Sizes.cbTrailer;
-    local pbIoBuffer       = ffi.new("uint8_t[?]", cbIoBufferLength);
-    ffi.copy( pbIoBuffer+self.Sizes.cbHeader, message, maxbytes);    -- message begins after the header
+--    local cbIoBufferLength = self.Sizes.cbHeader  +  self.Sizes.cbMaximumMessage  +  self.Sizes.cbTrailer;
+--    local pbIoBuffer       = ffi.new("uint8_t[?]", IoBufferLength);
+    ffi.copy( self.IoBuffer+self.Sizes.cbHeader, message, maxbytes);    -- message begins after the header
 
 
-    local res, err = EncryptSend(self.Socket, self.Context, pbIoBuffer, self.Sizes );
+    local res, err = EncryptSend(self.Socket, self.Context, self.IoBuffer, self.Sizes );
 
     return res, err;
 end

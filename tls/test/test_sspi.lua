@@ -1,13 +1,14 @@
+package.path = package.path..";../?.lua"
+
 local ffi = require("ffi");
 local bit = require("bit");
 local bor = bit.bor;
 local band = bit.band;
 
-local schannel = require("schannel");
 local sspi = require("sspi");
 local SecurityInterface = sspi.SecurityInterface;
 local SecurityPackage = sspi.SecurityPackage;
-
+local schannel = sspi.schannel;
 
 
 
@@ -23,6 +24,7 @@ function test_EnumeratePackages()
 			print("================================");
 			print("Name: ", package.Name);
 			print("Comment: ", package.Comment);
+			print("MaxToken: ", package.MaxToken);
 			print(package:ListCapabilities());
 		end
 	end
@@ -134,9 +136,9 @@ end
 
 
 
---test_EnumeratePackages();
+test_EnumeratePackages();
 --test_FindPackage();
-test_CreateCreds();
+--test_CreateCreds();
 --test_DefaultCredentials();
 
 --test_ClientConnection();
