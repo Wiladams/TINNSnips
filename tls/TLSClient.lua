@@ -10,6 +10,7 @@ local sspi = require("sspi");
 --2.0 Initialize Security Interface
 local SecurityInterface = sspi.SecurityInterface;
 local SecurityPackage = sspi.SecurityPackage;
+local SecurityContext = require("SecurityContext");
 
 
 
@@ -563,8 +564,11 @@ ClientSession.new = function(sock, serverName)
         return false, err;
     end
 
-    local Sizes = ffi.new("SecPkgContext_StreamSizes");
-    local scRet = SecurityInterface.QueryContextAttributesA( phContext, ffi.C.SECPKG_ATTR_STREAM_SIZES, Sizes );
+    local secContext = SecurityContext(phContext);
+    local Sizes = secContext:GetAttribute(ffi.C.SECPKG_ATTR_STREAM_SIZES);
+    
+    --local Sizes = ffi.new("SecPkgContext_StreamSizes");
+    --local scRet = SecurityInterface.QueryContextAttributesA( phContext, ffi.C.SECPKG_ATTR_STREAM_SIZES, Sizes );
 
     local ioLength = Sizes.cbHeader  +  Sizes.cbMaximumMessage  +  Sizes.cbTrailer;
 
