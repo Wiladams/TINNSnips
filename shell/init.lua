@@ -17,4 +17,6 @@ end
 
 import 'shell.ver';
 import 'datetime';
+import "Heap";
+import "processenvironment";
 import 'SysInfo';
