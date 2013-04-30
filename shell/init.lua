@@ -1,6 +1,14 @@
 -- shell.lua
 local langutils = require("langutils");
 
+include = function(name)
+	local module = require(name);
+
+	if module then
+		langutils.makeGlobal(module, name);
+	end
+end
+
 import = function(name)
 --print("Importing: ", name);
 	local module = require(name);
@@ -11,9 +19,7 @@ import = function(name)
 	end
 end
 
-exit = function(retValue)
-	assert(false, retValue);
-end
+
 
 import 'shell.ver';
 import 'datetime';
