@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Screen View</title>
+
+		<script type="text/javascript" src="jquery.js"></script>
+		<script language="javascript" type="text/javascript">
+			window.addEventListener('load', eventWindowLoaded, false);
+
+      		ScreenWidth = <?screenwidth?>
+      		ScreenHeight = <?screenheight?>
+      		CaptureWidth = <?capturewidth?>
+      		CaptureHeight = <?captureheight?>
+      		FrameInterval = <?frameinterval?>
+      		ImageWidth = <?imagewidth?>
+      		ImageHeight = <?imageheight?>
+
+      		var uioUri = "ws://<?hostip?>:<?serviceport?>/desktop/uiosocket"
+
+      		function eventWindowLoaded()
+      		{
+        		document.getElementById("screendiv").focus();
+            	setInterval("refreshImage()", FrameInterval); // Capture the image once every few milliseconds
+
+		        uioSocket = new WebSocket(uioUri); 
+      		}
+
+			function refreshImage() 
+			{
+   				if (!document.images) 
+   					return;
+   				
+   				document.images['myScreen'].src = '/desktop/screen.bmp?' + Math.random();
+			}
+		</script>
+	</head>
+
+	<body style="margin:0px">
+    	<div id="screendiv" tabindex="-1" 
+    		style="width:" + ImageWidth + "px; height:"+ImageHeight+"px; margin: 0px 0px 0px 0px; background:yellow; border:0px; groove;" 
+    		onselectstart="return false" 
+    		onmousedown="return false" 
+    		onkeydown="return false" >
+
+			<img src="/desktop/screen.bmp" name="myScreen">
+		</div>
+	</body>
+
+	<script>
+		function map(x, low, high, low2, high2)
+		{
+			return low2 + (x/(high-low) * (high2-low2));
+		}
+		
+		$("#screendiv").keydown(function(e){
+      		uioSocket.send("action=keydown;which="+e.which);
+		});
+
+		$("#screendiv").keyup(function(e){
+      		uioSocket.send("action=keyup;which="+e.which);
+		});
+
+		$("#screendiv").mousedown(function(e){
+			var x = map(e.pageX, 0,ImageWidth, 0,CaptureWidth);
+			var y = map(e.pageY, 0,ImageHeight, 0,CaptureHeight);
+
+      		uioSocket.send("action=mousedown;which="+e.which+";x="+x+";y="+y);
+ 		});
+
+		$("#screendiv").mouseup(function(e){
+			var x = map(e.pageX, 0,ImageWidth, 0,CaptureWidth);
+			var y = map(e.pageY, 0,ImageHeight, 0,CaptureHeight);
+
+      		uioSocket.send("action=mouseup;which="+e.which+";x="+x+";y="+y);
+		});
+
+ 		$("#screendiv").mousemove(function(e){			
+			var x = map(e.pageX, 0,ImageWidth, 0,CaptureWidth);
+			var y = map(e.pageY, 0,ImageHeight, 0,CaptureHeight);
+
+      		uioSocket.send("action=mousemove;x="+x+";y="+y);
+ 		});
+	</script>
+</html>
