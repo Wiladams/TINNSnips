@@ -1,5 +1,4 @@
 -- gl_red_24.lua
-package.path = package.path..";../?.lua"
 
 local View3D = require("View3D");
 

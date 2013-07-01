@@ -1,5 +1,4 @@
 -- page 335
-package.path = package.path..";../?.lua"
 
 local ffi = require("ffi");
 local bit = require("bit");

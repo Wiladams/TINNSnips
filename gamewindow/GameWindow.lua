@@ -7,12 +7,11 @@ local ffi = require "ffi"
 local bit = require "bit"
 local bor = bit.bor
 
-
---local gl = require "gl"
-
 local Gdi32 = require "GDI32"
 local User32 = require "User32"
-local Kernel32 = require "win_kernel32"
+local errorhandling = require("core_errorhandling_l1_1_1")
+local libraryloader = require("core_libraryloader_l1_1_1");
+local core_synch = require("core_synch_l1_2_0");
 
 local StopWatch = require "StopWatch"
 
@@ -90,7 +89,7 @@ end
 
 
 function GameWindow_t:Register(params)
-	self.AppInstance = Kernel32.Lib.GetModuleHandleA(nil)
+	self.AppInstance = libraryloader.GetModuleHandleA(nil)
 	self.ClassName = params.ClassName
 
 	local classStyle = bit.bor(User32.FFI.CS_HREDRAW, User32.FFI.CS_VREDRAW, User32.FFI.CS_OWNDC);
@@ -112,7 +111,7 @@ function GameWindow_t:Register(params)
 
 	self.Registration = User32.Lib.RegisterClassExA(aClass)
 
-	assert(self.Registration ~= 0, "Registration error"..tostring(Kernel32.GetLastError()))
+	assert(self.Registration ~= 0, "Registration error"..tostring(errorhandling.GetLastError()))
 end
 
 
@@ -141,7 +140,7 @@ print("GameWindow:CreateWindow - 1.0")
 		nil)
 print("GameWindow:CreateWindow - 2.0")
 
-	assert(hwnd,"unable to create window"..tostring(Kernel32.GetLastError()))
+	assert(hwnd,"unable to create window"..tostring(errorhandling.GetLastError()))
 
 
 	self:OnCreated(hwnd)
@@ -312,7 +311,7 @@ end
 --
 jit.off(Loop)
 function Loop(win)
-	local timerEvent = Kernel32.CreateEvent(nil, false, false, nil)
+	local timerEvent = core_synch.CreateEventA(nil, false, false, nil)
 	-- If the timer event was not created
 	-- just return
 	if timerEvent == nil then

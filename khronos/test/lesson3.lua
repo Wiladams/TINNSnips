@@ -1,4 +1,6 @@
-package.path = package.path..";../?.lua"
+--package.path = package.path..";../?.lua"
+local bit = require("bit");
+local bor = bit.bor;
 
 local View3D = require("View3D");
 

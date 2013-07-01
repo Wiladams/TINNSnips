@@ -1,5 +1,3 @@
-package.path = package.path..";../?.lua"
-
 local View3D = require("View3D");
 
 function drawOneLine(x1, y1, x2, y2)

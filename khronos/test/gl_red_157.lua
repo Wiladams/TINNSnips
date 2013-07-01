@@ -1,6 +1,4 @@
-package.path = package.path..";../?.lua"
 
-local ffi = require("ffi");
 local View3D = require("View3D");
 local shapes = require("shapes");
 

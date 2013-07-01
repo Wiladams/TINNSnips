@@ -1,4 +1,3 @@
-package.path = package.path..";../?.lua"
 
 local View3D = require("View3D");
 local shapes = require("shapes");

@@ -4,7 +4,7 @@ local ffi = require "ffi"
 local bit = require("bit");
 local bor = bit.bor;
 
-local Kernel32 = require("win_kernel32");
+local core_synch = require("core_synch_l1_2_0");
 local GDI32 = require ("GDI32");
 local User32 = require("User32");
 local GLWindow = require ("GLWindow");
@@ -46,7 +46,7 @@ function Loop(win)
 	win:Update();
 	win.IsRunning = true;
 
-	local timerEvent = Kernel32.CreateEvent(nil, false, false, nil)
+	local timerEvent = core_synch.CreateEventA(nil, false, false, nil)
 	-- If the timer event was not created
 	-- just return
 	if timerEvent == nil then

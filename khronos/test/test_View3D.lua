@@ -1,4 +1,4 @@
-package.path = package.path..";../?.lua"
+--package.path = package.path..";../?.lua"
 
 local View3D = require("View3D");
 
