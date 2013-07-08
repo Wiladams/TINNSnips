@@ -16,7 +16,7 @@ function keyboardinteraction(msg, wparam, lparam)
 	print(string.format("Keyboard: 0x%x", msg))
 end
 
-local sw = StopWatch.new();
+local sw = StopWatch();
 
 function randomColor()
 		local r = math.random(0,255)
@@ -75,7 +75,7 @@ end
 -- MouseInteractor = mouseinteraction,
 
 ---[[
-	local appwin = GameWindow({
+local appwin = GameWindow({
 		Title = "Game Window",
 		KeyboardInteractor = keyboardinteraction,
 		FrameRate = 120,
