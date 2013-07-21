@@ -1,22 +1,29 @@
 -- iocpserver.lua
+local HttpServer = require("HttpServer");
 
-local Computicle = require("Computicle");
-local IOCompletionPort = require("IOCompletionPort");
+local StaticService = require("StaticService");
 
+local pingtemplate = [[
+<html>
+  <head>
+    <title>HTTP Server</title>
+  </head>
+  <body>ping</body>
+</html>
+]]
 
--- create the queue that will be used 
--- to transfer new connections to workers
-newConnectionQueue = IOCompletionPort();
+local OnRequest = function(param, request, response)
+	print(string.format("PATH: %s", request.Url.path));
 
--- Create the computicle which will do the accepting
-local acceptor = Computicle:createFromFile("comp_socketacceptor.lua");
+	if request.Url.path == "/ping" then
+		--print("echo")
+		response:writeHead("200")
+		response:writeEnd(pingtemplate);
+	else
+		local filename = './wwwroot'..request.Url.path;
+		StaticService.SendFile(filename, response);
+	end
+end
 
-acceptor.outputQueue = newConnectionQueue;
-
--- create the workers which will handle the new connections
---local worker = Computicle:load("comp_newconnection")
-local worker1 = Computicle:createFromFile("comp_handler.lua");
-worker1.newConnectionQueue = newConnectionQueue;
-
-
-acceptor:waitForFinish();
+local server = HttpServer(8080, OnRequest);
+server:run();

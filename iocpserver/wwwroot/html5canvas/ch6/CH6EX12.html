@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CH6EX12: Multiple Video Bounce</title>
+<script src="modernizr-1.6.min.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+
+var videoElement;
+var videoDiv;
+function eventWindowLoaded() {
+	
+	videoElement = document.createElement("video");
+	var videoDiv = document.createElement('div');
+	document.body.appendChild(videoDiv);
+	videoDiv.appendChild(videoElement);
+	videoDiv.setAttribute("style", "display:none;");
+	var videoType = supportedVideoFormat(videoElement);
+	if (videoType == "") {
+		alert("no video support");
+		return;
+	}
+	videoElement.setAttribute("src", "muirbeach." + videoType);
+	videoElement.addEventListener("canplaythrough",videoLoaded,false);
+	
+	
+}
+
+function supportedVideoFormat(video) {
+	var returnExtension = "";
+	if (video.canPlayType("video/webm") =="probably" || video.canPlayType("video/webm") == "maybe") {
+		returnExtension = "webm";
+	} else if(video.canPlayType("video/mp4") == "probably" || video.canPlayType("video/mp4") == "maybe") {
+		returnExtension = "mp4";
+	} else if(video.canPlayType("video/ogg") =="probably" || video.canPlayType("video/ogg") == "maybe") {
+		returnExtension = "ogg";
+	} 
+	
+	return returnExtension;
+	
+}
+
+function canvasSupport () {
+  	return Modernizr.canvas;
+}
+
+
+
+function videoLoaded() {
+	canvasApp();
+
+}
+
+
+function canvasApp() {
+	
+  if (!canvasSupport()) {
+			 return;
+  		}
+	
+	
+
+	
+  
+  function  drawScreen () {
+
+		
+		context.fillStyle = '#000000';
+		context.fillRect(0, 0, theCanvas.width, theCanvas.height);
+		//Box
+		context.strokeStyle = '#ffffff'; 
+		context.strokeRect(1,  1, theCanvas.width-2, theCanvas.height-2);
+
+		
+		//Place videos
+		
+		context.fillStyle = "#FFFF00";
+		var video;
+		
+		for (var i =0; i <videos.length; i++) {
+			video = videos[i];
+			video.x += video.xunits;
+			video.y += video.yunits;
+			
+			context.drawImage(videoElement ,video.x, video.y, video.width, video.height);
+		
+			if (video.x > theCanvas.width-video.width || video.x < 0 ) {
+				video.angle = 180 - video.angle;
+				updatevideo(video);
+			} else if (video.y > theCanvas.height-video.height || video.y < 0) {
+				video.angle = 360 - video.angle;
+				updatevideo(video); 
+			}
+		}
+  			
+	}
+	
+	function updatevideo(video) {
+		
+		
+		video.radians = video.angle * Math.PI/ 180;
+		video.xunits = Math.cos(video.radians) * video.speed;
+		video.yunits = Math.sin(video.radians) * video.speed;
+	
+	}
+	
+	var numVideos = 12 ;
+	var maxSpeed = 10;
+	var videos = new Array();
+	var tempvideo;
+	var tempX;
+	var tempY;
+	var tempSpeed;
+	var tempAngle;
+	var tempRadians;
+	var tempXunits;
+	var tempYunits;
+	
+	var theCanvas = document.getElementById('canvasOne');
+	var context = theCanvas.getContext('2d');
+	videoElement.play();
+	
+	for (var i = 0; i < numVideos; i++) {
+		
+		tempX = 160 ;
+		tempY = 190 ;
+		tempSpeed = 5;
+		tempAngle =  Math.floor(Math.random()*360);
+		tempRadians = tempAngle * Math.PI/ 180;
+		tempXunits = Math.cos(tempRadians) * tempSpeed;
+		tempYunits = Math.sin(tempRadians) * tempSpeed;
+		
+		tempvideo = {x:tempX,y:tempY,width:180, height:120, speed:tempSpeed, angle:tempAngle, xunits:tempXunits, yunits:tempYunits}
+		videos.push(tempvideo);
+	}
+	
+	
+	
+    videoElement.loop = true;
+	
+	setInterval(drawScreen, 33);	
+	
+}
+
+
+</script>
+
+</head>
+<body> 
+<div style="position: absolute; top: 50px; left: 50px;">
+
+<canvas id="canvasOne" width="500" height="500">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+
+</body>
+</html>
+
+
+
+

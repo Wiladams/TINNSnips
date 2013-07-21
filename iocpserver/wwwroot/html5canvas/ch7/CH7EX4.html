@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CH7EX4 : Playing A Sound With No Tag </title>
+<script src="modernizr-1.6.min.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+
+var audioElement;
+function eventWindowLoaded() {
+	
+
+	audioElement = document.createElement("audio");
+	document.body.appendChild(audioElement);
+	var audioType = supportedAudioFormat(audioElement);
+	if (audioType == "") {
+		alert("no audio support");
+		return;
+	}
+	audioElement.setAttribute("src", "song1." + audioType);
+	audioElement.addEventListener("canplaythrough",audioLoaded,false);
+	
+	
+}
+
+function supportedAudioFormat(audio) {
+	var returnExtension = "";
+	if (audio.canPlayType("audio/ogg") =="probably" || audio.canPlayType("audio/ogg") == "maybe") {
+		returnExtension = "ogg";
+	} else if(audio.canPlayType("audio/wav") =="probably" || audio.canPlayType("audio/wav") == "maybe") {
+		returnExtension = "wav";
+	} else if(audio.canPlayType("audio/mp3") == "probably" || audio.canPlayType("audio/mp3") == "maybe") {
+		returnExtension = "mp3";
+	}
+	
+	return returnExtension;
+	
+}
+
+function canvasSupport () {
+  	return Modernizr.canvas;
+}
+
+
+
+function audioLoaded(event) {
+	
+	canvasApp();
+
+}
+
+
+
+function canvasApp() {
+	
+  if (!canvasSupport()) {
+			 return;
+  		}
+
+  
+  
+  function  drawScreen () {
+
+		//Background
+		
+		context.fillStyle = '#ffffaa';
+		context.fillRect(0, 0, theCanvas.width, theCanvas.height);
+		//Box
+		context.strokeStyle = '#000000'; 
+		context.strokeRect(5,  5, theCanvas.width-10, theCanvas.height-10);
+		
+		
+		// Text
+		context.fillStyle    = "#000000";
+		context.fillText  ("Duration:" + audioElement.duration,  20 ,20);
+		context.fillText  ("Current time:" + audioElement.currentTime,  20 ,40);
+		context.fillText  ("Loop: " + audioElement.loop,  20 ,60);
+		context.fillText  ("Autoplay: " +audioElement.autoplay,  20 ,80);
+		context.fillText  ("Muted: " + audioElement.muted,  20 ,100);
+		context.fillText  ("Controls: " + audioElement.controls,  20 ,120);
+		context.fillText  ("Volume: " + audioElement.volume,  20 ,140);
+		context.fillText  ("Paused: " + audioElement.paused,  20 ,160);
+		context.fillText  ("Ended: " + audioElement.ended,  20 ,180);
+		context.fillText  ("Source: " + audioElement.currentSrc,  20 ,200);
+		context.fillText  ("Can Play OGG: " + audioElement.canPlayType("audio/ogg"),  20 ,220);
+		context.fillText  ("Can Play WAV: " + audioElement.canPlayType("audio/wav"),  20 ,240);
+		context.fillText  ("Can Play MP3: " + audioElement.canPlayType("audio/mp3"),  20 ,260);
+		
+  			
+	}
+	
+	var theCanvas = document.getElementById('canvasOne');
+	var context = theCanvas.getContext('2d');
+	audioElement.play()
+	
+	setInterval(drawScreen, 33);	
+	
+}
+
+
+</script>
+
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+
+<canvas id="canvasOne" width="500" height="300">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+
+
+</body>
+</html>
+
+
+
+

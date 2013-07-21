@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CH6EX4: Basic HTML5 Video With Resize Range Control </title>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+	var sizeElement = document.getElementById("videoSize")
+	sizeElement.addEventListener('change', videoSizeChanged, false);
+	var videoElement = document.getElementById("theVideo");
+	var widthtoHeightRatio = videoElement.width/videoElement.height;
+		
+
+function videoSizeChanged(e) {
+		
+		var target =  e.target;
+		var videoElement = document.getElementById("theVideo");
+		videoElement.width = target.value;
+		videoElement.height = target.value/widthtoHeightRatio;
+		
+		
+	}
+	
+}
+
+</script>
+</head>
+<body>
+<div>
+<form>
+ Video Size : <input type="range" id="videoSize"
+       min="80"
+       max="1280"
+       step="1"
+       value="320"/>
+  </form>
+  <br>   
+</div>
+<div>
+<video  autoplay loop controls id="theVideo" width="320" height="240">
+ <source src="muirbeach.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' >
+ <source src="muirbeach.webm"type='video/webm; codecs="vp8, vorbis"' >
+ <source src="muirbeach.ogg" type='video/ogg; codecs="theora, vorbis"'>
+ 
+</video>
+</div>
+
+</body>
+</html>
+
+
+
+

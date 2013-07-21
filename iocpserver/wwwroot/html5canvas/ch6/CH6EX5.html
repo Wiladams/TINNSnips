@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CH6EX5: Basic HTML5 Preleoading Video</title>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+	var videoElement = document.getElementById("thevideo");
+	
+	videoElement.addEventListener('progress',updateLoadingStatus,false);
+	videoElement.addEventListener('canplaythrough',playVideo,false);
+    //playVideo(); // add back for browsers that no lolnger fire events for embedded <video>
+			
+}
+
+function updateLoadingStatus() {
+
+	var loadingStatus = document.getElementById("loadingStatus");
+	var videoElement = document.getElementById("thevideo");
+	var percentLoaded = parseInt(((videoElement.buffered.end(0) /videoElement.duration) * 100));
+    document.getElementById("loadingStatus").innerHTML =   percentLoaded + '%';
+
+}
+
+
+}
+function playVideo() {
+	var videoElement = document.getElementById("thevideo");
+	videoElement.play();
+
+}
+</script>
+
+</head>
+<body>
+<div>
+<video loop controls id="thevideo" width="320" height="240" >
+ <source src="muirbeach.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' >
+ <source src="muirbeach.webm"type='video/webm; codecs="vp8, vorbis"' >
+ <source src="muirbeach.ogg" type='video/ogg; codecs="theora, vorbis"'>
+ 
+</video>
+
+<div>
+
+<div id="loadingStatus">
+0%
+</div>
+
+</div>
+</body>
+</html>
+
+
+
+

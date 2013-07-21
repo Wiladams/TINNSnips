@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CH5EX6: Multiple Ball Bounce With Resize</title>
+<script src="modernizr-1.6.min.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+	canvasApp();
+}
+
+function canvasSupport () {
+  	return Modernizr.canvas;
+}
+
+function canvasApp() {
+	
+  if (!canvasSupport()) {
+			 return;
+  		}
+	
+ 	formElement = document.getElementById("canvasWidth")
+	formElement.addEventListener('change', canvasWidthChanged, false);	
+	
+	formElement = document.getElementById("canvasHeight")
+	formElement.addEventListener('change', canvasHeightChanged, false);
+
+  function  drawScreen () {
+
+		
+		context.fillStyle = '#EEEEEE';
+		context.fillRect(0, 0, theCanvas.width, theCanvas.height);
+		//Box
+		context.strokeStyle = '#000000'; 
+		context.strokeRect(1,  1, theCanvas.width-2, theCanvas.height-2);
+		
+		//Place balls
+		
+		context.fillStyle = "#000000";
+		var ball;
+		
+		for (var i =0; i <balls.length; i++) {
+			ball = balls[i];
+			ball.x += ball.xunits;
+			ball.y += ball.yunits;
+			
+			context.beginPath();
+			context.arc(ball.x,ball.y,ball.radius,0,Math.PI*2,true);
+			context.closePath();
+			context.fill();
+		
+			if (ball.x > theCanvas.width || ball.x < 0 ) {
+				ball.angle = 180 - ball.angle;
+				updateBall(ball);
+			} else if (ball.y > theCanvas.height || ball.y < 0) {
+				ball.angle = 360 - ball.angle;
+				updateBall(ball); 
+			}
+		}
+  			
+	}
+	
+	function updateBall(ball) {
+		
+		ball.radians = ball.angle * Math.PI/ 180;
+		ball.xunits = Math.cos(ball.radians) * ball.speed;
+		ball.yunits = Math.sin(ball.radians) * ball.speed;
+	
+	}
+	
+	var numBalls = 500 ;
+	var maxSize = 8;
+	var minSize = 5;
+	var maxSpeed = maxSize+5;
+	var balls = new Array();
+	var tempBall;
+	var tempX;
+	var tempY;
+	var tempSpeed;
+	var tempAngle;
+	var tempRadius;
+	var tempRadians;
+	var tempXunits;
+	var tempYunits;
+	
+	theCanvas = document.getElementById('canvasOne');
+	context = theCanvas.getContext('2d');
+	
+	for (var i = 0; i < numBalls; i++) {
+		tempRadius = Math.floor(Math.random()*maxSize)+minSize;
+		tempX = tempRadius*2 + (Math.floor(Math.random()*theCanvas.width)-tempRadius*2);
+		tempY = tempRadius*2 + (Math.floor(Math.random()*theCanvas.height)-tempRadius*2);
+		tempSpeed = maxSpeed-tempRadius;
+		tempAngle =  Math.floor(Math.random()*360);
+		tempRadians = tempAngle * Math.PI/ 180;
+		tempXunits = Math.cos(tempRadians) * tempSpeed;
+		tempYunits = Math.sin(tempRadians) * tempSpeed;
+		
+		tempBall = {x:tempX,y:tempY,radius:tempRadius, speed:tempSpeed, angle:tempAngle, xunits:tempXunits, yunits:tempYunits}
+		balls.push(tempBall);
+	}
+	
+	setInterval(drawScreen, 33);	
+	
+	function canvasWidthChanged(e) {
+		var target =  e.target;
+		theCanvas.width =  target.value;
+		drawScreen();
+	}
+	
+	function canvasHeightChanged(e) {
+		var target =  e.target;
+		theCanvas.height =  target.value;
+		drawScreen();
+	}
+	
+}
+
+</script>
+
+</head>
+<body> 
+<div style="position: absolute; top: 50px; left: 50px;">
+
+<canvas id="canvasOne" width="500" height="500">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+<form>
+  
+ Canvas Width:  <input type="range" id="canvasWidth"
+       min="0"
+       max="1000"
+       step="1"
+       value="500"/>
+ <br>      
+   Canvas Height:  <input type="range" id="canvasHeight"
+       min="0"
+       max="1000"
+       step="1"
+       value="500"/>
+ <br>      
+  
+  </form>
+</div>
+
+</body>
+</html>
+
+
+
+

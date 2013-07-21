@@ -3,12 +3,12 @@ local StopWatch = require("StopWatch");
 local Collections = require ("Collections");
 
 local FileStream = require ("FileStream");
-local NetStream = require ("NetStream");
-local SocketPool = require("SocketPool");
+local IOProcessor = require("IOProcessor");
+local IOCPNetStream = require("IOCPNetStream");
 
 local URL = require ("url");
-local HttpRequest = require ("HttpRequest");
-local HttpResponse = require("HttpResponse");
+local WebRequest = require ("WebRequest");
+local WebResponse = require("WebResponse");
 local chunkiter = require ("HttpChunkIterator");
 
 local sout = FileStream.new(io.stdout)
@@ -21,12 +21,15 @@ local http_get = function(resource, showheaders, onfinish)
 	end
 
 	local urlparts = URL.parse(resource, {port="80", path="/", scheme="http"});
+
 	local hostname = urlparts.host
 	local path = urlparts.path
 	local port = urlparts.port
 
+--	print("URL: ", hostname, port, path);
+
 	-- Open up a stream to get the real content
-	local resourcestream, err = NetStream.Open(hostname, port);
+	local resourcestream, err = IOCPNetStream:create(hostname, port)
 
 	if not resourcestream then
 		return onfinish(nil, err)
@@ -38,21 +41,21 @@ local http_get = function(resource, showheaders, onfinish)
 	end
 
 	local headers = {
-		["Host"]		= hostname,
+		["Host"]		= urlparts.authority,
 		["Connection"]	= "close",
 	}
 	if urlparts.query then
 		path = path..'?'..urlparts.query
 	end
 
-	local request = HttpRequest.new("GET", path, headers, nil);
+	local request = WebRequest("GET", path, headers, nil);
 	local success, err = request:Send(resourcestream);
 
 	if not success then
 		return onfinish(false, err)
 	end
 
-	local response, err = HttpResponse.Parse(resourcestream);
+	local response, err = WebResponse:Parse(resourcestream);
 
 	if response then
 		-- successful read of preamble

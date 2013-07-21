@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ch2Ex13 Combine scale and rotation #2</title>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+
+function canvasApp(){
+
+	var theCanvas = document.getElementById('canvas');
+  	if (!theCanvas || !theCanvas.getContext) {
+    		return;
+  	}
+  
+  	var context = theCanvas.getContext('2d');
+ 	
+	if (!context) {
+   	 	return;
+  	}
+	
+	
+	drawScreen(); 
+
+	function drawScreen() {
+		
+		//now draw a red rectangle
+		context.setTransform(1,0,0,1,0,0);
+		var angleInRadians =90 * Math.PI / 180;
+		var x=100;
+		var y=100;
+		var width=100;
+		var height=50;
+		context.translate(x+.5*width, y+.5*height);
+		context.rotate(angleInRadians);
+		context.scale(2,2);
+		
+		context.fillStyle = "red";
+		context.fillRect(-.5*width,-.5*height , width, height);
+		
+		
+	}
+
+}
+
+
+</script> 
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+<canvas id="canvas" width="500" height="500">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>

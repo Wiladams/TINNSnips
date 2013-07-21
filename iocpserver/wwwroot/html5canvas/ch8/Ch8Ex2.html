@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ch8Ex2</title>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+
+function canvasApp(){
+
+	
+
+	var theCanvas = document.getElementById('canvas');
+  	if (!theCanvas || !theCanvas.getContext) {
+    		return;
+  	}
+  
+  	var context = theCanvas.getContext('2d');
+ 	
+	if (!context) {
+   	 	return;
+  	}
+	
+	
+	drawScreen();
+
+	function drawScreen() {
+		// draw background and text 
+		context.fillStyle = '#000000';
+  		context.fillRect(0, 0, 200, 200);
+		context.fillStyle    = '#ffffff';
+		context.font         = '20px _sans';
+		context.textBaseline = 'top';
+		context.fillText  ("Player Ship - Static", 0, 180);
+
+		//drawShip
+		context.strokeStyle = '#ffffff';
+		context.beginPath();
+		context.moveTo(10,0); 
+		context.lineTo(19,19);
+		context.lineTo(10,9);
+		context.moveTo(9,9); 
+		context.lineTo(0,19);
+		context.lineTo(9,0);
+		
+		context.stroke();
+		context.closePath();
+		
+
+	}
+
+}
+
+
+</script> 
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+<canvas id="canvas" width="200" height="200">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>

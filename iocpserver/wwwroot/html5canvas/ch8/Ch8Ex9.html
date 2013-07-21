@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ch8Ex9 - Application State Machines</title>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+
+function canvasApp(){
+
+	
+
+	var theCanvas = document.getElementById('canvas');
+  	if (!theCanvas || !theCanvas.getContext) {
+    		return;
+  	}
+  
+  	var context = theCanvas.getContext('2d');
+ 	
+	if (!context) {
+   	 	return;
+  	}
+	
+	//application states
+
+
+	const GAME_STATE_TITLE=0;
+	const GAME_STATE_NEW_LEVEL=1;
+	const GAME_STATE_GAME_OVER=2;
+
+	
+	var currentGameState=0;
+	var currentGameStateFunction=null;
+
+	
+	
+	function switchGameState(newState) {
+		currentGameState=newState;
+		switch (currentGameState) {
+		
+			case GAME_STATE_TITLE:
+				 currentGameStateFunction=gameStateTitle;
+				 break;
+			
+			case GAME_STATE_PLAY_LEVEL:
+				 currentGameStateFunctionappStatePlayeLevel;
+				 break;
+				 
+			case GAME_STATE_GAME_OVER:
+				 currentGameStateFunction=gameStateGameOver;
+				 break;
+		
+		}
+   
+   }
+
+	
+	function gameStateTitle() {
+		ConsoleLog.log("appStateTitle");
+		// draw background and text 
+		context.fillStyle = '#000000';
+  		context.fillRect(0, 0, 200, 200);
+		context.fillStyle    = '#ffffff';
+		context.font         = '20px _sans';
+		context.textBaseline = 'top';
+		context.fillText  ("Title Screen", 50, 90);
+		
+	}
+	
+	function gameStatePlayLevel() {
+		ConsoleLog.log("appStateGamePlay");
+	}
+	
+	function gameStateGameOver() {
+		ConsoleLog.log("appStateGameOver");
+	}
+	
+	function runGame(){
+		currentGameStateFunction();
+	}
+	
+	//*** application start
+	switchGameState(GAME_STATE_TITLE);
+	
+	//**** application loop
+	const FRAME_RATE=40;
+	var intervalTime=1000/FRAME_RATE;
+	setInterval(runGame, intervalTime );
+	
+	
+
+	
+
+}
+
+//***** object prototypes *****
+
+//*** consoleLog util object
+//creat constructor
+function ConsoleLog(){
+	
+}
+
+//create function that will be added to the class
+console_log=function(message) {
+	if(typeof(console) !== 'undefined' && console != null) {
+		console.log(message);
+	}
+}
+//add class/static function to class by assignment
+ConsoleLog.log=console_log;
+
+//*** end console log object
+
+</script> 
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+<canvas id="canvas" width="200" height="200">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>

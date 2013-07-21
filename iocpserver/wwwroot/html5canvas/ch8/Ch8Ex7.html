@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ch8Ex7 - Ship alpha fade in </title>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+
+function canvasApp(){
+
+	
+
+	var theCanvas = document.getElementById('canvas');
+  	if (!theCanvas || !theCanvas.getContext) {
+    		return;
+  	}
+  
+  	var context = theCanvas.getContext('2d');
+ 	
+	if (!context) {
+   	 	return;
+  	}
+	
+	//canvasApp level variables
+	var x=50;
+	var y=50;
+	var width=20;
+	var height=20;
+	var alpha=0;
+	context.globalAlpha = 1;
+
+	function drawScreen() {
+	
+		context.globalAlpha = 1;
+	
+		context.fillStyle = '#000000';
+  		context.fillRect(0, 0, 200, 200);
+		context.fillStyle    = '#ffffff';
+		context.font         = '20px _sans';
+		context.textBaseline = 'top';
+		context.fillText  ("Player Ship - alpha", 0, 180);
+	
+	
+		context.globalAlpha = alpha;
+		
+		
+		context.save(); //save current state in stack 
+		context.setTransform(1,0,0,1,0,0); // reset to identity
+		
+		//translate the canvas origin to the center of the player
+		context.translate(x+.5*width,y+.5*height);
+
+		
+		//drawShip
+		
+		context.strokeStyle = '#ffffff';
+		context.beginPath();
+		
+		//hard coding in locations
+		context.moveTo(5,-5); 
+		context.lineTo(14,14);
+		context.lineTo(5,4);
+		context.moveTo(4,4); 
+		context.lineTo(-5,14);
+		context.lineTo(4,-5);
+		
+		
+		
+		context.stroke();
+		context.closePath();
+		
+		//restore context
+		context.restore(); //pop old state on to screen
+		
+		//add to rotation
+		alpha+=.01;
+		if (alpha > 1) {
+		alpha=0;
+		}
+		
+
+	}
+	
+	const FRAME_RATE=40;
+	var intervalTime=1000/FRAME_RATE;
+	setInterval(drawScreen, intervalTime );
+
+}
+
+
+</script> 
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+<canvas id="canvas" width="200" height="200">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>

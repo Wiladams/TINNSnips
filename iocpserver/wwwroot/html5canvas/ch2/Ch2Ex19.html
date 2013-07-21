@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ch2Ex19 Simple Linear Gradients #6 Vertical stroke shape</title>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+
+function canvasApp(){
+
+	var theCanvas = document.getElementById('canvas');
+  	if (!theCanvas || !theCanvas.getContext) {
+    		return;
+  	}
+  
+  	var context = theCanvas.getContext('2d');
+ 	
+	if (!context) {
+   	 	return;
+  	}
+	
+	
+	drawScreen(); 
+
+	function drawScreen() {
+		
+		var gr = context.createLinearGradient(0, 0, 0, 100);
+		
+		// Add the color stops.
+		
+		  
+		gr.addColorStop(0,'rgb(255,0,0)');
+		gr.addColorStop(.5,'rgb(0,255,0)');
+		gr.addColorStop(1,'rgb(255,0,0)');
+		
+		
+		// Use the gradient for the fillStyle.
+		context.strokeStyle = gr;
+		context.beginPath();
+		context.moveTo(0,0);
+		context.lineTo(50,0);
+		context.lineTo(100,50);
+		context.lineTo(50,100);
+		context.lineTo(0,100);
+		context.lineTo(0,0);
+		context.stroke();
+		context.closePath();
+
+	}
+
+}
+
+
+</script> 
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+<canvas id="canvas" width="500" height="500">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chapter 4 Example 15: Scrolling - controlled panning and zooming</title>
+<script src="modernizr-1.6.min.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+function canvasSupport () {
+  	return Modernizr.canvas;
+}
+
+
+function canvasApp(){
+	
+
+	if (!canvasSupport()) {
+			 return;
+  	}else{
+	    var theCanvas = document.getElementById('canvas');
+	    var context = theCanvas.getContext('2d');
+	}
+	
+	var photo=new Image();
+	photo.addEventListener('load', eventPhotoLoaded , false);
+	photo.src="butterfly.jpg";
+	
+	//3548 x 2736
+	
+	
+	var windowWidth=500;
+	var windowHeight=500;
+	
+	var windowX=0;
+	var windowY=0;
+	var currentScale=.5;
+	var minScale=.2
+	var maxScale=3;
+	var scaleIncrement=.1;
+	
+	function eventPhotoLoaded() {
+		startUp();
+	}
+
+	function drawScreen(){
+		
+		//draw a background so we can wee the Canvas edges
+		context.fillStyle="#ffffff";
+		context.fillRect(0,0,500,500);
+		
+		
+		context.drawImage(photo, windowX, windowY,windowWidth,windowHeight,0,0,windowWidth*currentScale,windowHeight*currentScale);
+		
+		
+		
+	}
+	
+	function startUp(){
+
+		setInterval(drawScreen, 100 );
+	}
+	
+	document.onkeydown=function(e){
+		
+		e=e?e:window.event;
+		console.log(e.keyCode + "down");
+		
+		switch (e.keyCode){
+			case 38:
+				//up
+				windowY-=10;
+				if (windowY<0){
+					windowY=0;
+				}
+				break;
+			case 40:
+				//down
+				windowY+=10;
+				if (windowY>photo.height - windowHeight){
+					windowY=photo.height - windowHeight;
+				}
+				break;
+			case 37:
+				//left
+				windowX-=10;
+				if (windowX<0){
+					windowX=0;
+				}
+				break;
+			case 39:
+				windowX+=10;
+				if (windowX>photo.width - windowWidth){
+					windowX=photo.width - windowWidth;
+				}
+				break;
+			case 109:
+				//-
+				currentScale-=scaleIncrement;
+				if (currentScale<minScale){
+					currentScale=minScale;
+				}
+				break;
+			case 107:
+				//+
+				currentScale+=scaleIncrement;
+				if (currentScale>maxScale){
+					currentScale=maxScale;
+				}
+		}
+		
+		
+	}
+
+
+}
+
+
+</script> 
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+<canvas id="canvas" width="500" height="500">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>

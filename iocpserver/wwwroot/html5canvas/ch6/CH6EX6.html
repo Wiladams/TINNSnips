@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CH6EX6 : Basic HTML5 Load Video Onto The Canvas</title>
+<script src="modernizr-1.6.min.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+var videoElement;
+var videoDiv;
+function eventWindowLoaded() {
+	
+	videoElement = document.createElement("video");
+	videoDiv = document.createElement('div');
+	document.body.appendChild(videoDiv);
+	videoDiv.appendChild(videoElement);
+	videoDiv.setAttribute("style", "display:none;");
+	var videoType = supportedVideoFormat(videoElement);
+	if (videoType == "") {
+		alert("no video support");
+		return;
+	}
+	videoElement.setAttribute("src", "muirbeach." + videoType);
+	videoElement.addEventListener("canplaythrough",videoLoaded,false);
+	
+	
+}
+
+function supportedVideoFormat(video) {
+	var returnExtension = "";
+	if (video.canPlayType("video/webm") =="probably" || video.canPlayType("video/webm") == "maybe") {
+		returnExtension = "webm";
+	} else if(video.canPlayType("video/mp4") == "probably" || video.canPlayType("video/mp4") == "maybe") {
+		returnExtension = "mp4";
+	} else if(video.canPlayType("video/ogg") =="probably" || video.canPlayType("video/ogg") == "maybe") {
+		returnExtension = "ogg";
+	} 
+	
+	return returnExtension;
+	
+}
+
+
+
+function canvasSupport () {
+  	return Modernizr.canvas;
+}
+
+
+function videoLoaded(event) {
+
+	canvasApp();
+
+}
+
+
+
+function canvasApp() {
+	
+  if (!canvasSupport()) {
+			 return;
+  		}
+
+  function  drawScreen () {
+
+		//Background
+		
+		context.fillStyle = '#ffffaa';
+		context.fillRect(0, 0, theCanvas.width, theCanvas.height);
+		//Box
+		context.strokeStyle = '#000000'; 
+		context.strokeRect(5,  5, theCanvas.width-10, theCanvas.height-10);
+		//video
+		context.drawImage(videoElement , 85, 30);
+		
+			
+			
+	}
+	
+	var theCanvas = document.getElementById('canvasOne');
+	var context = theCanvas.getContext('2d');
+	videoElement.play();
+	
+	setInterval(drawScreen, 33);	
+	
+}
+
+
+</script>
+
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+
+<canvas id="canvasOne" width="500" height="300">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+
+</body>
+</html>
+
+
+
+

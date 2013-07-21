@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ch2Ex4 Arcs, Curves, and beziers</title>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+
+function canvasApp(){
+
+	var theCanvas = document.getElementById('canvas');
+  	if (!theCanvas || !theCanvas.getContext) {
+    		return;
+  	}
+  
+  	var context = theCanvas.getContext('2d');
+ 	
+	if (!context) {
+   	 	return;
+  	}
+	
+	
+	drawScreen(); 
+
+	function drawScreen() {
+		
+		
+		//round end, bevel join, not at top or left of canvas
+		
+		context.beginPath();
+		context.strokeStyle = "black"; 
+		context.lineWidth=5;
+		context.arc(100, 100, 20, (Math.PI/180)*0, (Math.PI/180)*360, false); // full circle
+		context.stroke();
+		context.closePath();
+		
+		
+		
+		
+	}
+
+}
+
+
+</script> 
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+<canvas id="canvas" width="500" height="500">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>

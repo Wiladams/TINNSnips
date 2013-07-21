@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ch8Ex10 - render/update</title>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+
+function canvasApp(){
+
+	
+
+	var theCanvas = document.getElementById('canvas');
+  	if (!theCanvas || !theCanvas.getContext) {
+    		return;
+  	}
+  
+  	var context = theCanvas.getContext('2d');
+ 	
+	if (!context) {
+   	 	return;
+  	}
+	
+	//canvasApp level variables
+	
+	var rotation=0;
+	var x=50;
+	var y=50;
+	var facingX=0;
+	var facingY=0;
+	var movingX=0;
+	var movingY=0;
+	var width=20;
+	var height=20;
+	var rotationalVelocity=5; //how many degrees to turn the ship
+	var thrustAcceleration=.03;
+	var keyPressList=[];
+	
+	
+	function gameStatePlayLevel() {
+		checkKeys();
+		update();
+		render();
+	}
+	
+	function checkKeys() {
+		
+		//check keys
+		
+		if (keyPressList[38]==true){
+		//thrust
+			var angleInRadians = rotation * Math.PI / 180;
+			facingX=Math.cos(angleInRadians);
+			facingY=Math.sin(angleInRadians);
+			
+			movingX=movingX+thrustAcceleration*facingX;
+			movingY=movingY+thrustAcceleration*facingY;
+		
+		}
+		
+		if (keyPressList[37]==true) {
+			//rotate counter-clockwise
+			rotation-=rotationalVelocity;
+			
+			
+		}
+		
+		if (keyPressList[39]==true) {
+			//rotate clockwise
+			rotation+=rotationalVelocity;;
+		}
+	}
+	
+	function update() {
+		x=x+movingX;
+		y=y+movingY;
+	}
+	
+	function render() {
+		// draw background and text 
+		context.fillStyle = '#000000';
+  		context.fillRect(0, 0, 200, 200);
+		context.fillStyle    = '#ffffff';
+		context.font         = '20px _sans';
+		context.textBaseline = 'top';
+		context.fillText  ("render/update", 0, 180);
+		
+		//transformation
+		var angleInRadians = rotation * Math.PI / 180;
+		context.save(); //save current state in stack 
+		context.setTransform(1,0,0,1,0,0); // reset to identity
+		
+		//translate the canvas origin to the center of the player
+		context.translate(x+.5*width,y+.5*height);
+		context.rotate(angleInRadians);
+		
+		//drawShip
+		
+		context.strokeStyle = '#ffffff';
+		context.beginPath();
+		
+		//hard coding in locations
+		//facing right
+		context.moveTo(-10,-10); 
+		context.lineTo(10,0);
+		context.moveTo(10,1);
+		context.lineTo(-10,10);
+		context.lineTo(1,1);
+		context.moveTo(1,-1);
+		context.lineTo(-10,-10);
+		
+		context.stroke();
+		context.closePath();
+		
+		//restore context
+		context.restore(); //pop old state on to screen
+		}
+	
+	function runGame() {
+		gameStatePlayLevel();
+	}
+	
+	const FRAME_RATE=40;
+	var intervalTime=1000/FRAME_RATE;
+	setInterval(runGame, intervalTime );
+	
+	document.onkeydown=function(e){
+		
+		e=e?e:window.event;
+		//ConsoleLog.log(e.keyCode + "down");
+		keyPressList[e.keyCode]=true;
+	}
+	
+	document.onkeyup=function(e){
+	//document.body.onkeyup=function(e){
+		e=e?e:window.event;
+		//ConsoleLog.log(e.keyCode + "up");
+		keyPressList[e.keyCode]=false;
+	};
+
+}
+
+
+</script> 
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+<canvas id="canvas" width="200" height="200">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>

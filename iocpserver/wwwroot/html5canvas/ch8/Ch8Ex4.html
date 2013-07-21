@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ch8Ex4 - Ship animation loop</title>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+
+function canvasApp(){
+
+	
+
+	var theCanvas = document.getElementById('canvas');
+  	if (!theCanvas || !theCanvas.getContext) {
+    		return;
+  	}
+  
+  	var context = theCanvas.getContext('2d');
+ 	
+	if (!context) {
+   	 	return;
+  	}
+	
+	//canvasApp level variables
+	var shipState=0; //0=static, 1=thrust
+	
+
+	function drawScreen() {
+		//update the shipState
+		shipState++;
+		if (shipState >1) {
+			shipState=0;
+		}
+	
+	
+		// draw background and text 
+		context.fillStyle = '#000000';
+  		context.fillRect(0, 0, 200, 200);
+		context.fillStyle    = '#ffffff';
+		context.font         = '20px _sans';
+		context.textBaseline = 'top';
+		context.fillText  ("Player Ship - Thrust", 0, 180);
+
+		//drawShip
+		context.strokeStyle = '#ffffff';
+		context.beginPath();
+		context.moveTo(10,0); 
+		context.lineTo(19,19);
+		context.lineTo(10,9);
+		context.moveTo(9,9); 
+		context.lineTo(0,19);
+		context.lineTo(9,0);
+		
+		if (shipState==1) {
+			//draw thrust
+			context.moveTo(8,13); 
+			context.lineTo(11,13);
+			context.moveTo(9,14);
+			context.lineTo(9,18);
+			context.moveTo(10,14);
+			context.lineTo(10,18);
+		}
+		
+		context.stroke();
+		context.closePath();
+		
+
+	}
+	
+	const FRAME_RATE=40;
+	var intervalTime=1000/FRAME_RATE;
+	setInterval(drawScreen, intervalTime );
+
+}
+
+
+</script> 
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+<canvas id="canvas" width="200" height="200">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>
+

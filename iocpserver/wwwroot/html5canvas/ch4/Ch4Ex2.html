@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chapter 4 Example 2: Image Basics</title>
+<script src="modernizr-1.6.min.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+function canvasSupport () {
+  	return Modernizr.canvas;
+}
+
+
+function canvasApp(){
+	
+
+	if (!canvasSupport()) {
+			 return;
+  	}else{
+	    var theCanvas = document.getElementById('canvas');
+	    var context = theCanvas.getContext('2d');
+	}
+	
+	var spaceShip=new Image();
+	spaceShip.addEventListener('load', eventShipLoaded , false);
+	spaceShip.src="ship1.png";
+	
+	
+	function eventShipLoaded() {
+		drawScreen();
+	}
+	
+
+	function drawScreen() {
+		 
+		 //draw a background so we can wee the Canvas edges
+		 context.fillStyle="#aaaaaa";
+		 context.fillRect(0,0,500,500);
+		 
+		 context.drawImage(spaceShip, 0, 0);
+		 context.drawImage(spaceShip, 0, 34,32,32);
+		 context.drawImage(spaceShip, 0, 68,64,64);
+		 context.drawImage(spaceShip, 0, 140,16,16);
+
+	}
+
+}
+
+
+</script> 
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+<canvas id="canvas" width="500" height="500">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>

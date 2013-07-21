@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Chapter 4 – Example 4-1a</title>
+		<script src="modernizr-1.6.min.js"></script>
+		<script type="text/javascript">
+		var spaceShip = new Image();
+		spaceShip.src = "ship1.png";
+
+		window.onload = function () {
+			if (!Modernizr.canvas) {
+				return;
+			} else {
+				spaceShip.onload = canvasApp ();
+			}
+		}
+
+		function canvasApp() {
+
+			var theCanvas = document.getElementById('canvas');
+		        var context = theCanvas.getContext('2d');   
+
+			drawScreen();
+
+			function drawScreen() {
+				placeShip(context, spaceShip, 0, 0);
+				placeShip(context, spaceShip, 50, 50);
+			}
+			
+			function placeShip(ctx, obj, posX, posY, width, height) {
+				if (width && height) {
+					context.drawImage(obj, posX, posY, width, height);
+				} else {
+					context.drawImage(obj, posX, posY);
+				}
+			}
+			
+		}
+
+		</script> 
+	</head>
+	<body>
+		<div style="position: absolute; top: 50px; left: 50px;">
+			<canvas id="canvas" width="500" height="300">
+				Your browser does not support the HTML 5 Canvas. 
+			</canvas>
+		</div>
+	</body>
+</html>

@@ -25,7 +25,7 @@ HandleSingleRequest = function(stream)
 
 	local urlparts = URL.parse(request.Resource)
 
-print("PATH: ", urlparts.path);
+print(string.format("PATH: %s", urlparts.path));
 
 	if urlparts.path == "/ping" then
 		--print("echo")
@@ -47,9 +47,11 @@ local HandleNewConnection = function(sock)
 	local socket = IOCPSocket:init(sock, IOProcessor);
 	local netstream = NetStream:init(socket);
 
-	--if not netstream:isConnected() then
-	--	return false, "stream is disconnected"
-	--end
+	socket:send("HTTP/1.1 200 OK\r\n")
+	socket:send("Host: localhost\r\n");
+	socket:send("\r\n");
+	socket:send(pingtemplate);
+
 
 	if HandleSingleRequest then
 		--print("HandleSingleRequest Defined")
@@ -60,7 +62,7 @@ local HandleNewConnection = function(sock)
 
 	-- close the stream
 	-- an alternative is to pass along to a defined continuation
-	netstream:closeDown();
+	--netstream:closeDown();
 
 	-- not strictly needed here, but instructive
 	--collectgarbage();

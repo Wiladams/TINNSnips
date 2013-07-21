@@ -1,0 +1,49 @@
+Example 4-17. Copying from one canvas to another
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CH4EX17: Canvas Copy</title>
+<script src="modernizr-1.6.min.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);
+function eventWindowLoaded() {
+    canvasApp();
+}
+
+function canvasSupport () {
+    return Modernizr.canvas;
+}
+
+function canvasApp(){
+    if (!canvasSupport()) {
+        return;
+    }else{
+        var theCanvas = document.getElementById("canvas");
+        var context = theCanvas.getContext("2d");
+        var theCanvas2 = document.getElementById("canvas2");
+        var context2 = theCanvas2.getContext("2d");
+    }   
+    var tileSheet = new Image();
+    tileSheet.addEventListener('load', eventSheetLoaded , false);
+    tileSheet.src="tanks_sheet.png";
+    function eventSheetLoaded() {
+        startUp();
+    }
+    
+    function startUp(){
+        context.drawImage(tileSheet, 0, 0);
+        context2.drawImage(theCanvas, 32, 0,32,32,0,0,32,32);
+    }
+}
+</script>
+</head>
+<body>
+<div>
+<canvas id="canvas" width="256" height="256" style="position: absolute;
+top: 50px; left: 50px;"> Your browser does not support HTML5 Canvas.</canvas>
+<canvas id="canvas2" width="32" height="32" style="position: absolute;
+top: 256px; left: 50px;">Your browser does not support HTML5 Canvas.</canvas>
+</div>
+</body>
+</html>

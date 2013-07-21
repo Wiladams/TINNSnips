@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CH5EX9: Moving In Circle</title>
+<script src="modernizr-1.6.min.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+	canvasApp();
+
+}
+
+function canvasSupport () {
+  	return Modernizr.canvas;
+}
+
+function canvasApp() {
+	
+  if (!canvasSupport()) {
+			 return;
+  		}
+
+  function  drawScreen () {
+
+		context.fillStyle = '#EEEEEE';
+		context.fillRect(0, 0, theCanvas.width, theCanvas.height);
+		//Box
+		context.strokeStyle = '#000000'; 
+		context.strokeRect(1,  1, theCanvas.width-2, theCanvas.height-2);
+		
+		ball.x = circle.centerX + Math.cos(circle.angle) * circle.radius;
+		ball.y = circle.centerY + Math.sin(circle.angle) * circle.radius;
+		
+		circle.angle += ball.speed;
+	
+		context.fillStyle = "#000000";
+		context.beginPath();
+		context.arc(ball.x,ball.y,15,0,Math.PI*2,true);
+		context.closePath();
+		context.fill();
+	
+	}
+	
+	var radius = 100;
+	var circle = {centerX:250, centerY:250, radius:125, angle:0}
+	var ball = {x:0, y:0,speed:.1};
+		
+    theCanvas = document.getElementById('canvasOne');
+	context = theCanvas.getContext('2d');
+	
+	setInterval(drawScreen, 33);	
+	
+}
+
+</script>
+
+</head>
+<body>  
+<div style="position: absolute; top: 50px; left: 50px;">
+
+<canvas id="canvasOne" width="500" height="500">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+
+</body>
+</html>
+
+
+
+

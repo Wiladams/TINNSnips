@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chapter 4 Example 16: Image Stamper Application</title>
+<script src="modernizr-1.6.min.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+function canvasSupport () {
+  	return Modernizr.canvas;
+}
+
+
+function canvasApp(){
+	
+
+	if (!canvasSupport()) {
+			 return;
+  	}else{
+	    var theCanvas = document.getElementById('canvas');
+	    var context = theCanvas.getContext('2d');
+	}
+	
+	var mouseX;
+	var mouseY;
+	
+	
+	var tileSheet=new Image();
+	tileSheet.addEventListener('load', eventSheetLoaded , false);
+	tileSheet.src="tanks_sheet.png";
+	
+	
+	var imageData=context.createImageData(32,32);
+	
+	function eventSheetLoaded() {
+		startUp();
+	}
+
+	function startUp(){
+		context.fillStyle="#aaaaaa";
+		context.fillRect(0,0,256,256);
+		drawTileSheet();
+	}
+	
+	function drawTileSheet(){
+		context.drawImage(tileSheet, 0, 0);
+		
+	}
+	
+	function highlightTile(tileId,x,y){
+		context.fillStyle="#aaaaaa";
+		context.fillRect(0,0,256,128);
+		drawTileSheet();
+		
+		imageData=context.getImageData(x,y,32,32);
+		//loop through imageData.data. Set every 4th value to a new value
+		for (j=3; j< imageData.data.length; j+=4){
+			imageData.data[j]=128;
+		}
+		
+		
+		var startX=Math.floor(tileId % 8) *32;
+		var startY=Math.floor(tileId / 8) *32;
+		context.strokeStyle="red";
+		context.strokeRect(startX,startY,32,32)
+	}
+	
+	function onMouseMove(e) {
+		mouseX=e.clientX-theCanvas.offsetLeft;
+		mouseY=e.clientY-theCanvas.offsetTop;
+	      
+	}
+	
+	function onMouseClick(e) {
+		console.log("click: " + mouseX + "," + mouseY);
+		if (mouseY < 128){
+			//find tile to highlight
+			var col=Math.floor(mouseX / 32);
+			var row=Math.floor(mouseY / 32)
+			var tileId=(row*7)+(col+row);
+			highlightTile(tileId,col*32,row*32)
+		}else{
+			var col=Math.floor(mouseX / 32);
+			var row=Math.floor(mouseY / 32)
+			
+			context.putImageData(imageData,col*32,row*32);
+			
+			
+		}
+	}
+	
+	theCanvas.addEventListener("mousemove", onMouseMove, false);
+	theCanvas.addEventListener("click", onMouseClick, false);
+
+
+}
+
+
+</script> 
+</head>
+<body>
+<div>
+<canvas id="canvas" width="256" height="256"  style="position: absolute; top: 50px; left: 50px;">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+
+
+</body>
+</html>

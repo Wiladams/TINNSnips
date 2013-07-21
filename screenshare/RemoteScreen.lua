@@ -1,17 +1,22 @@
 
 local MemoryStream = require("MemoryStream");
-local BinaryStream = require("BinaryStream");
 local NetStream = require("NetStream")
 local HttpRequest = require ("HttpRequest");
 local URL = require ("url");
 local zlib = require "zlib"
 
-local RemoteScreen_t = {}
+local RemoteScreen = {}
+setmetatable(RemoteScreen, {
+	__call = function(self, ...)
+		return self:create(...);
+	end,
+});
+
 local RemoteScreen_mt = {
-	__index = RemoteScreen_t,
+	__index = RemoteScreen,
 }
 
-local RemoteScreen = function(url)
+RemoteScreen.init = function(self, url)
 	local urlparts = URL.parse(url, {port="80", path="/", scheme="http"});
 
 	local obj = {

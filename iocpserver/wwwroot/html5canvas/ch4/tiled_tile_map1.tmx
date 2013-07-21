@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="10" height="10" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="tanks" tilewidth="32" tileheight="32">
+  <image source="tanks_sheet.png"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="10" height="10">
+  <data encoding="csv">
+32,31,31,31,1,31,31,31,31,32,
+1,1,1,1,1,1,1,1,1,1,
+32,1,26,1,26,1,26,1,1,32,
+32,26,1,1,26,1,1,26,1,32,
+32,1,1,1,26,26,1,26,1,32,
+32,1,1,26,1,1,1,26,1,32,
+32,1,1,1,1,1,1,26,1,32,
+1,1,26,1,26,1,26,1,1,1,
+32,1,1,1,1,1,1,1,1,32,
+32,31,31,31,1,31,31,31,31,32
+</data>
+ </layer>
+</map>

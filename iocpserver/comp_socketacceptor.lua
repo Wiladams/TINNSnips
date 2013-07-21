@@ -1,32 +1,30 @@
 -- comp_socketacceptor.lua
 
-gIdleTimeout = 50;
+local IOCPSocket = require("IOCPSocket");
+
+--gIdleTimeout = 50;
 
 local listener, err = IOProcessor:createServerSocket({port=8080});
 
 if not listener then
 	print("Error creating listener: ", err);
-	return false, err;
+	exit(err);
 end
 
 print("Listener: ", listener:getNativeSocket(), err);
 
-local currentAccepting = false;
+PostAccept = function()
+	--print("== AcceptOne ==");
+	while true do
+		local accepted, err = listener:accept();
+		
+		print("ACCEPTED: ", accepted, err);
 
-AcceptOne = function()
-	print("== AcceptOne ==");
-
-	currentlyAccepting = true;
-	local accepted, err = listener:accept();
-	if outputQueue then
-		print("Stuffinng IOCP: ", accepted);
-		outputQueue:enqueue(accepted);
-	end
-	currentlyAccepting = false;
-end
-
-OnIdle = function(counter)
-	if not currentlyAccepting then
-		spawn(AcceptOne);
+		if outputQueue then
+			print("Stuffinng IOCP: ", accepted);
+			outputQueue:enqueue(accepted);
+		end
 	end
 end
+
+spawn(PostAccept);

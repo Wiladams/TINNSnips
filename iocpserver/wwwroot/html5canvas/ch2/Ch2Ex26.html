@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ch2Ex26 Fill Pattern Example #2</title>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+
+function canvasApp(){
+
+	var theCanvas = document.getElementById('canvas');
+  	if (!theCanvas || !theCanvas.getContext) {
+    		return;
+  	}
+  
+  	var context = theCanvas.getContext('2d');
+ 	
+	if (!context) {
+   	 	return;
+  	}
+	
+	
+	drawScreen(); 
+
+	function drawScreen() {
+		
+		
+		var fillImg = new Image();  
+		fillImg.src = 'fill_20x20.gif';  
+		
+		fillImg.onload = function(){  
+  
+			var fillPattern1 = context.createPattern(fillImg,'no-repeat');  
+			var fillPattern2 = context.createPattern(fillImg,'repeat-x'); 
+			var fillPattern3 = context.createPattern(fillImg,'repeat-y'); 
+			
+			context.fillStyle = fillPattern1;  
+			context.fillRect(0,0,100,100);  
+			
+			context.fillStyle = fillPattern2;  
+			context.fillRect(0,110,100,100);  
+			
+			context.fillStyle = fillPattern3;  
+			context.fillRect(0,220,100,100);  
+  
+	
+		}
+	}
+
+}
+
+
+</script> 
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+<canvas id="canvas" width="500" height="500">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+</body>
+</html>

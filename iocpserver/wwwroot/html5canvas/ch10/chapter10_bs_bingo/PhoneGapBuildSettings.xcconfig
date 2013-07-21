@@ -1,0 +1,7 @@
+//
+//  PhoneGap.xcconfig
+//  chapter10_bs_bingo
+//
+
+// Override this to use your project specific PHONEGAPLIB
+PHONEGAPLIB = $(PHONEGAPLIB)

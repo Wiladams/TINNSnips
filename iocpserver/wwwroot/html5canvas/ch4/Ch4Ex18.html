@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chapter 4 Example 18: Canvas Pixel Array</title>
+<script src="modernizr-1.6.min.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+
+	canvasApp();
+	
+}
+
+function canvasSupport () {
+  	return Modernizr.canvas;
+}
+
+
+function canvasApp(){
+	
+
+	if (!canvasSupport()) {
+			 return;
+  	}else{
+	    var theCanvas = document.getElementById('canvas');
+	    var context = theCanvas.getContext('2d');
+	    
+	    
+	}
+	
+	var tileSheet=new Image();
+	tileSheet.addEventListener('load', eventSheetLoaded , false);
+	tileSheet.src="tanks_sheet.png";
+	
+	
+	function eventSheetLoaded() {
+		startUp();
+	}
+
+	function startUp(){
+		context.drawImage(tileSheet, 0, 0);
+		console.log(context.CanvasPixelArray[0][0]);
+
+	}
+
+
+}
+
+
+</script> 
+</head>
+<body>
+<div>
+<canvas id="canvas" width="256" height="256"  style="position: absolute; top: 50px; left: 50px;">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+
+
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CH5EX2: Moving On A Simple Line</title>
+<script src="modernizr-1.6.min.js"></script>
+<script type="text/javascript">
+window.addEventListener('load', eventWindowLoaded, false);	
+function eventWindowLoaded() {
+	canvasApp();
+	
+	
+}
+
+
+function canvasSupport () {
+  	return Modernizr.canvas;
+}
+
+
+function canvasApp() {
+	
+  if (!canvasSupport()) {
+			 return;
+  		}
+  
+  
+  var pointImage = new Image();
+  pointImage.src = "point.png";
+		
+  function  drawScreen () {
+
+		
+		context.fillStyle = '#EEEEEE';
+		context.fillRect(0, 0, theCanvas.width, theCanvas.height);
+		//Box
+		context.strokeStyle = '#000000'; 
+		context.strokeRect(1,  1, theCanvas.width-2, theCanvas.height-2);
+		
+		
+		
+		// Create ball
+		
+		if (moves > 0 ) {
+			moves--;
+			ball.x += xunits;
+			ball.y += yunits;
+		}
+		
+		//Draw points to illustrate path
+		
+		
+		
+		points.push({x:ball.x,y:ball.y});
+		
+		for (var i= 0; i< points.length; i++) {
+			context.drawImage(pointImage, points[i].x, points[i].y,1,1);
+			
+		}
+		
+		
+		context.fillStyle = "#000000";
+		context.beginPath();
+		context.arc(ball.x,ball.y,15,0,Math.PI*2,true);
+		context.closePath();
+		context.fill();
+		
+  			
+	}
+	var speed = 5;
+	var p1 = {x:20,y:250};
+	var p2 = {x:480,y:250};
+	var dx = p2.x - p1.x;
+	var dy = p2.y - p1.y;
+	var distance = Math.sqrt(dx*dx + dy*dy);
+	var moves = distance/speed;
+	var xunits = (p2.x - p1.x)/moves;
+	var yunits = (p2.y - p1.y)/moves;
+	var ball = {x:p1.x, y:p1.y};
+	var points = new Array();
+	
+	theCanvas = document.getElementById('canvasOne');
+	context = theCanvas.getContext('2d');
+	
+	setInterval(drawScreen, 33);	
+	
+}
+
+
+</script>
+
+</head>
+<body>
+<div style="position: absolute; top: 50px; left: 50px;">
+
+<canvas id="canvasOne" width="500" height="500">
+ Your browser does not support the HTML 5 Canvas. 
+</canvas>
+</div>
+
+
+
+</body>
+</html>
+
+
+
+

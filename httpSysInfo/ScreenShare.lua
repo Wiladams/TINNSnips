@@ -1,25 +1,17 @@
 
 local ffi = require "ffi"
 
-local WebApp = require("WebApp")
-
-local HttpRequest = require "HttpRequest"
-local HttpResponse = require "HttpResponse"
-local URL = require("url")
-local StaticService = require("StaticService")
-
 local GDI32 = require ("GDI32")
 local User32 = require ("User32")
 local BinaryStream = require("BinaryStream")
 local MemoryStream = require("MemoryStream")
-local WebSocketStream = require("WebSocketStream")
+local WebSocket = require("WebSocket")
 local Network = require("Network")
 
 local utils = require("utils")
 local zlib = require ("zlib")
 
 local UIOSimulator = require("UIOSimulator")
-
 
 --[[
 	Application Variables
@@ -149,7 +141,7 @@ local getSingleShot = function(response, compressed)
 
   response:writeHead("200", headers);
   response:WritePreamble();
-  return response.DataStream:WriteBytes(zstream.Buffer, zstream.BytesWritten);
+  return response.DataStream:writeBytes(zstream.Buffer, zstream.BytesWritten);
 end
 
 
@@ -202,7 +194,7 @@ ScreenShare.handleStartupRequest = function(request, response)
       ["imageheight"]		= ImageHeight,
       ["screenwidth"]		= ScreenWidth,
       ["screenheight"]	= ScreenHeight,
-      ["serviceport"] 	= Runtime.config.port,
+      ["serviceport"] 	= serviceport,
     }
     startupContent = string.gsub(content, "%<%?(%a+)%?%>", subs)
   end
@@ -218,25 +210,24 @@ end
 	Responding to remote user input
 ]]--
 local handleUIOSocketData = function(ws)
+--print("handleUIOSocketData")
     while true do
-        local bytes, bytesread = ws:ReadFrame();
-
-        if not bytes then
+        local frame, err = ws:ReadFrame();
+        if not frame then
           print("handleUIOSocketData() - END: ", err);
           break
         end
 
-        local command = ffi.string(bytes, bytesread);
+        local command = ffi.string(frame.Data, frame.DataLength);
         handleUIOCommand(command);
     end
 end
 
 local handleUIOSocket = function(request, response)
-
-    local ws = WebSocketStream();
+    local ws = WebSocket();
     ws:RespondWithServerHandshake(request, response);
 
-    Runtime.Scheduler:Spawn(handleUIOSocketData, ws);
+    spawn(handleUIOSocketData, ws);
 
     return false;
 end
@@ -246,20 +237,19 @@ end
 	Primary Service Response routine
 --]]
 ScreenShare.handleRequest = function(request, response)
-    local urlparts = URL.parse(request.Resource)
-
+--print("ScreenShare.handleRequest: ", request.Url.path)
     local success = nil;
 
-    if urlparts.path == "/desktop" then
-        ScreenShare.handleStartupRequest(request, response);
-    elseif urlparts.path == "/desktop/uiosocket" then
-      --success, err = handleUIOSocket(request, response)
-    elseif urlparts.path == "/desktop/screen.bmp" then
-      --print("SCREEN.BMP")
-      success, err = getSingleShot(response, true);
+    if request.Url.path == "/desktop" then
+      ScreenShare.handleStartupRequest(request, response);
+    elseif request.Url.path == "/desktop/uiosocket" then
+      handleUIOSocket(request, response)
+    elseif request.Url.path == "/desktop/screen.bmp" then
+      getSingleShot(response, true);
     else
+      print("ScreenShare:404: ", request.Url.path)
 	    response:writeHead("404");
-	    local success, err = response:writeEnd();
+	    response:writeEnd();
     end
 end
 
