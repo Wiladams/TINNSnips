@@ -126,7 +126,7 @@ local handleStartupRequest = function(request, response)
     -- assume content looks like this:
     -- <?hostip?>:<?serviceport?>
     local subs = {
-      ["frameinterval"]	= 300,
+      ["frameinterval"]	= 200,
       ["hostip"] 			= net:GetLocalAddress(),
       ["capturewidth"]	= captureWidth,
       ["captureheight"]	= captureHeight,

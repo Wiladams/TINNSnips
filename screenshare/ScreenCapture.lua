@@ -93,7 +93,7 @@ ScreenCapture.getCurrentBitmap = function(self, srcWidth, srcHeight, srcXOrigin,
       ROP);
 
 	self.Frame = self.Frame + 1;
-	print("Frame: ", self.Frame);
+	--print("Frame: ", self.Frame);
 
 
     --self.hbmScreen.hDC:Flush();
