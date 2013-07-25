@@ -63,12 +63,12 @@ ScreenCapture.init = function(self, params)
   	local bitcount = params.hbmScreen.Info.bmiHeader.biBitCount;
   	local rowsize = GDI32.GetAlignedByteCount(width, bitcount, 4);
   	params.pixelarraysize = rowsize * math.abs(height);
-    local pixeloffset = 54;
-    local filesize = 54+params.pixelarraysize;
+    params.pixeloffset = 54;
+    params.filesize = 54+params.pixelarraysize;
 
-    local streamsize = GDI32.GetAlignedByteCount(filesize, 8, 4);
+    local streamsize = GDI32.GetAlignedByteCount(params.filesize, 8, 4);
 	
-	params.CapturedStream = MemoryStream.new(filesize);
+	params.CapturedStream = MemoryStream.new(streamsize);
 
 print("== Screen Capture ==")
 print("Source: ", params.XOriginSrc, params.YOriginSrc, params.WidthSrc, params.HeightSrc);
@@ -109,13 +109,16 @@ ScreenCapture.captureScreen = function(self)
 
     local bs = BinaryStream.new(self.CapturedStream);
 
+--print("FILESIZE: ", self.filesize);
+--print("PIXEL OFF:", self.pixeloffset);
+
 	-- Write File Header
     bs:WriteByte(string.byte('B'))
     bs:WriteByte(string.byte('M'))
-    bs:WriteInt32(filesize);
+    bs:WriteInt32(self.filesize);
     bs:WriteInt16(0);
     bs:WriteInt16(0);
-    bs:WriteInt32(pixeloffset);
+    bs:WriteInt32(self.pixeloffset);
 
     -- Bitmap information header
     bs:WriteInt32(40);

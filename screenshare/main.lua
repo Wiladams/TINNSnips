@@ -9,8 +9,8 @@ local Network = require("Network")
 
 local GDI32 = require ("GDI32")
 local User32 = require ("User32")
---local BinaryStream = require("BinaryStream")
 local MemoryStream = require("MemoryStream")
+local FileStream = require("FileStream");
 local ScreenCapture = require("ScreenCapture");
 
 local utils = require("utils")
@@ -18,9 +18,11 @@ local zlib = require ("zlib")
 
 local UIOSimulator = require("UIOSimulator")
 
+
 local arg = {...}
 local serviceport = tonumber(arg[1]) or 8080
 
+local fsout = FileStream();
 
 --[[
 	Application Variables
@@ -51,10 +53,10 @@ local getContentSize = function(width, height, bitcount, alignment)
 
   local rowsize = GDI32.GetAlignedByteCount(width, bitcount, alignment);
   local pixelarraysize = rowsize * math.abs(height);
-  local filesize = 54+pixelarraysize;
   local pixeloffset = 54;
+  local totalsize = pixeloffset+pixelarraysize;
 
-  return filesize;
+  return totalsize;
 end
 
 
@@ -62,28 +64,50 @@ local filesize = getContentSize(ImageWidth, ImageHeight, ImageBitCount);
 local zstream = MemoryStream.new(filesize);
 
 
-
-local getSingleShot = function(response, compressed)
+local getCompressedSingleShot = function(response)
   screenCap:captureScreen();
 
   zstream:Seek(0);
   local compressedLen = ffi.new("int[1]", zstream.Length);
   local err = zlib.compress(zstream.Buffer,   compressedLen, 
-    screenCap.CapturedStream.Buffer, screenCap.CapturedStream:GetPosition() );
+      screenCap.CapturedStream.Buffer, screenCap.CapturedStream:GetPosition() );
 
   zstream.BytesWritten = compressedLen[0];
-
   local contentlength = zstream.BytesWritten;
+
   local headers = {
     ["Content-Length"] = tostring(contentlength),
-	  ["Content-Type"] = "image/bmp",
-	  ["Content-Encoding"] = "deflate",
---    ["Connection"] = "close",
+    ["Content-Type"] = "image/bmp",
+    ["Content-Encoding"] = "deflate",
   }
 
   response:writeHead("200", headers);
   response:WritePreamble();
-  return response.DataStream:writeBytes(zstream.Buffer, zstream.BytesWritten);
+
+
+  response.DataStream:writeBytes(zstream.Buffer, contentlength);
+
+  return true;
+end
+
+
+local getSingleShot = function(response)
+  screenCap:captureScreen();
+
+  local contentlength = screenCap.CapturedStream:GetPosition();
+
+  local headers = {
+    ["Content-Length"] = tostring(contentlength),
+	  ["Content-Type"] = "image/bmp",
+  }
+
+  response:writeHead("200", headers);
+  response:WritePreamble();
+
+
+  response.DataStream:writeBytes(screenCap.CapturedStream.Buffer, contentlength);
+
+  return true;
 end
 
 local handleUIOCommand = function(command)
@@ -110,7 +134,8 @@ local handleStartupRequest = function(request, response)
   -- read the entire contents
   if not startupContent then
     -- load the file into memory
-    local fs, err = io.open("viewscreen.htm")
+    --local fs, err = io.open("viewscreen.htm")
+    local fs, err = io.open("sharescreen.htm")
 
     if not fs then
       response:writeHead("500")
@@ -126,7 +151,7 @@ local handleStartupRequest = function(request, response)
     -- assume content looks like this:
     -- <?hostip?>:<?serviceport?>
     local subs = {
-      ["frameinterval"]	= 200,
+      ["frameinterval"]	= 500,
       ["hostip"] 			= net:GetLocalAddress(),
       ["capturewidth"]	= captureWidth,
       ["captureheight"]	= captureHeight,
@@ -176,15 +201,22 @@ end
 --[[
 	Primary Service Response routine
 ]]--
+local server = nil;
+
 local OnRequest = function(param, request, response)
-print("OnRequest: ", request.Resource);
+print("OnRequest: ", request.Url.path);
 
   local success = nil;
 
   if request.Url.path == "/uiosocket" then
     success, err = handleUIOSocket(request, response)
+    
+    -- For this case, return after handing off the socket
+    -- as we don't want the socket to be recycled from here
+    return true;
   elseif request.Url.path == "/screen.bmp" then
-    success, err = getSingleShot(response, true);
+    --success, err = getSingleShot(response, true);
+    success, err = getCompressedSingleShot(response);
   elseif request.Url.path == "/screen" then
     success, err = handleStartupRequest(request, response)
   elseif request.Url.path == "/favicon.ico" then
@@ -195,11 +227,14 @@ print("OnRequest: ", request.Resource);
 	  response:writeHead("404");
 	  success, err = response:writeEnd();
   end
+
+  -- Recycle the socket
+  server:HandleRequestFinished(request)
 end
 
 
 --[[ 
   Start running the service 
 --]]
-local server = HttpServer(serviceport, OnRequest);
+server = HttpServer(serviceport, OnRequest);
 server:run();

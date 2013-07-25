@@ -15,12 +15,15 @@
       		ImageWidth = <?imagewidth?>
       		ImageHeight = <?imageheight?>
 
+      		var uioUri = "ws://<?hostip?>:<?serviceport?>/uiosocket"
 
       		function eventWindowLoaded()
       		{
         		document.getElementById("screendiv").focus();
             	// Capture the image once every few milliseconds
             	setInterval("refreshImage()", FrameInterval); 
+
+		        uioSocket = new WebSocket(uioUri); 
       		}
 
 			function refreshImage() 
@@ -43,4 +46,40 @@
 			<img src="/screen.bmp" name="myScreen">
 		</div>
 	</body>
+
+	<script>
+		function map(x, low, high, low2, high2)
+		{
+			return low2 + (x/(high-low) * (high2-low2));
+		}
+		
+		$("#screendiv").keydown(function(e){
+      		uioSocket.send("action=keydown;which="+e.which);
+		});
+
+		$("#screendiv").keyup(function(e){
+      		uioSocket.send("action=keyup;which="+e.which);
+		});
+
+		$("#screendiv").mousedown(function(e){
+			var x = map(e.pageX, 0,ImageWidth, 0,CaptureWidth);
+			var y = map(e.pageY, 0,ImageHeight, 0,CaptureHeight);
+
+      		uioSocket.send("action=mousedown;which="+e.which+";x="+x+";y="+y);
+ 		});
+
+		$("#screendiv").mouseup(function(e){
+			var x = map(e.pageX, 0,ImageWidth, 0,CaptureWidth);
+			var y = map(e.pageY, 0,ImageHeight, 0,CaptureHeight);
+
+      		uioSocket.send("action=mouseup;which="+e.which+";x="+x+";y="+y);
+		});
+
+ 		$("#screendiv").mousemove(function(e){			
+			var x = map(e.pageX, 0,ImageWidth, 0,CaptureWidth);
+			var y = map(e.pageY, 0,ImageHeight, 0,CaptureHeight);
+
+      		uioSocket.send("action=mousemove;x="+x+";y="+y);
+ 		});
+	</script>
 </html>
