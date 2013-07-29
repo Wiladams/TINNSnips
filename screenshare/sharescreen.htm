@@ -15,7 +15,13 @@
       		ImageWidth = <?imagewidth?>
       		ImageHeight = <?imageheight?>
 
-      		var uioUri = "ws://<?hostip?>:<?serviceport?>/uiosocket"
+          Authority = '<?authority?>'
+          HttpBase = '<?httpbase?>'
+          WebSocketBase = '<?websocketbase?>'
+          HostIp = '<?hostip?>'
+          ServicePort = <?serviceport?>
+
+      		var uioUri = WebSocketBase + 'ws/'+Authority+'/uiosocket'
 
       		function eventWindowLoaded()
       		{
@@ -31,7 +37,8 @@
    				if (!document.images) 
    					return;
    				
-   				document.images['myScreen'].src = '/screen.bmp?' + Math.random();
+          		var asrc = HttpBase + 'http/' + Authority + '/screen.bmp?' + Math.random();
+   				document.images['myScreen'].src = asrc;
 			}
 		</script>
 	</head>

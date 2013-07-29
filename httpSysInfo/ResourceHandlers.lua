@@ -16,6 +16,7 @@ local wfs = FileSystem("c:");
 -- /login
 Handlers.HandleLoginGET = function(request, response)
 	local auth = request:GetHeader("authorization");
+
 	if not auth then
 		local headers = {["WWW-Authenticate"] = 'Basic realm="redmond"'};
 		response:writeHead("401", headers);
@@ -24,6 +25,8 @@ Handlers.HandleLoginGET = function(request, response)
 		response:writeHead("200");
 		response:writeEnd(pages.index);
 	end
+
+    return recycleRequest(request);
 end
 
 Handlers.HandleDefaultGET = function(request, response)
@@ -31,15 +34,20 @@ Handlers.HandleDefaultGET = function(request, response)
 	response:writeEnd(pages.index);
 
 	-- StaticService.SendFile("."..urlparts.path, response);
+    return recycleRequest(request);
 end
 
 -- favicon.ico
 Handlers.HandleFaviconGET = function(request, response)
-    return StaticService.SendFile("favicon.ico", response)
+    StaticService.SendFile("favicon.ico", response)
+
+    return recycleRequest(request);
 end
 
 Handlers.HandleJQueryGET = function(request, response)
-    return StaticService.SendFile("jquery.js", response)
+    StaticService.SendFile("jquery.js", response)
+
+    return recycleRequest(request);
 end
 
 -- /files
@@ -62,7 +70,8 @@ print("REL PATH: ", relativePath);
 		-- if it's a file, then return the file using
 		-- the static handler
 		if not fsItem:isDirectory() then
-    		return StaticService.SendFile(relativePath, response);
+    		StaticService.SendFile(relativePath, response);
+    		return recycleRequest(request);
 		end
 	end
 
@@ -108,13 +117,19 @@ print("SEARCH: ", searchPath);
 
     table.insert(body, "</ul></body></html>\n");
     local stuffit = table.concat(body);
-    return response:writeEnd(stuffit);
+    response:writeEnd(stuffit);
+
+    return recycleRequest(request);
 end
 
 -- /desktop
 Handlers.HandleDesktopGET = function(request, response)
 --print("HandleDesktopGET")
-	return ScreenShare.handleRequest(request, response);
+	ScreenShare.handleRequest(request, response);
+
+	-- Do NOT recycle the request stream
+	-- allow the desktop handler to do that
+	return true;
 end
 
 Handlers.HandleServicesGET = function(request, response)
@@ -149,6 +164,8 @@ Handlers.HandleServicesGET = function(request, response)
 	--print("echo")
 	response:writeHead("200")
 	response:writeEnd(jsonstr);
+
+	return recycleRequest(request);
 end
 
 -- /processes
@@ -182,6 +199,8 @@ Handlers.HandleProcessesGET = function(request, response)
 
 	response:writeHead("200")
 	response:writeEnd(jsonstr);
+
+	return recycleRequest(request);
 end
 
 --[[

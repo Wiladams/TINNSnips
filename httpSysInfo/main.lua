@@ -8,7 +8,7 @@
 	Either a file is fetched, or an error is returned.
 
 	Usage:
-	  tinn staticserver.lua [port]
+	  tinn main.lua [port]
 
 	default port used is 8080
 
@@ -37,6 +37,13 @@ local OnRequest = function(param, request, response)
 		handler(request, response);
 	else
 		print("NO HANDLER: ", request.Url.path);
+		-- send back content not found
+		response:writeHead(404);
+		response:writeEnd();
+
+		-- recylce the request in case the socket
+		-- is still open
+		recycleRequest(request);
 	end
 end
 
@@ -46,4 +53,8 @@ end
   Start running the service 
 --]]
 local server = HttpServer(serviceport, OnRequest);
+recycleRequest = function(request)
+	return server:HandleRequestFinished(request);
+end
+
 server:run();

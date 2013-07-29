@@ -15,6 +15,12 @@
       		ImageWidth = <?imagewidth?>
       		ImageHeight = <?imageheight?>
 
+          Authority = '<?authority?>'
+          HttpBase = '<?httpbase?>'
+          WebSocketBase = '<?websocketbase?>'
+          HostIp = '<?hostip?>'
+          ServicePort = <?serviceport?>
+
 
       		function eventWindowLoaded()
       		{
@@ -28,7 +34,8 @@
    				if (!document.images) 
    					return;
    				
-   				document.images['myScreen'].src = '/screen.bmp?' + Math.random();
+          var asrc = HttpBase + 'http/' + Authority + '/screen.bmp?' + Math.random();
+   				document.images['myScreen'].src = asrc;
 			}
 		</script>
 	</head>

@@ -151,16 +151,32 @@ local handleStartupRequest = function(request, response)
     -- assume content looks like this:
     -- <?hostip?>:<?serviceport?>
     local subs = {
-      ["frameinterval"]	= 500,
+      ["authority"]     = request:GetHeader("host"),
       ["hostip"] 			= net:GetLocalAddress(),
+      ["httpbase"]      = request:GetHeader("x-bhut-http-url-base"),
+      ["websocketbase"] = request:GetHeader("x-bhut-ws-url-base"),
+      ["serviceport"]   = serviceport,
+
+      ["frameinterval"] = 1000,
       ["capturewidth"]	= captureWidth,
       ["captureheight"]	= captureHeight,
       ["imagewidth"]		= ImageWidth,
       ["imageheight"]		= ImageHeight,
       ["screenwidth"]		= ScreenWidth,
       ["screenheight"]	= ScreenHeight,
-      ["serviceport"] 	= serviceport,
     }
+
+print("== HEADERS == ")
+for key,value in pairs(request.Headers) do
+  print(key, value);
+end
+print("--------------");
+
+--print("TEMPLATE CONSTRUCTION")
+--for key, value in pairs(subs) do
+--  print(key, value)
+--end
+
     startupContent = string.gsub(content, "%<%?(%a+)%?%>", subs)
   end
 

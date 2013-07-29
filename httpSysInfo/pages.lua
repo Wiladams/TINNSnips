@@ -10,7 +10,7 @@ index = [[
 		<li><a href="/desktop">Desktop</a>
 		<li><a href="/processes">Processes</a>
 		<li><a href="/services">Services</a>
-		<li><a href="/users">Users</a>
+		<li><a href="/files">Files</a>
 		</ul>
 	</body>
 </html>
