@@ -12,6 +12,8 @@ local pingtemplate = [[
 </html>
 ]]
 
+local server;
+
 local OnRequest = function(param, request, response)
 	print(string.format("PATH: %s", request.Url.path));
 
@@ -23,7 +25,9 @@ local OnRequest = function(param, request, response)
 		local filename = './wwwroot'..request.Url.path;
 		StaticService.SendFile(filename, response);
 	end
+
+	server:HandleRequestFinished(request);
 end
 
-local server = HttpServer(8080, OnRequest);
+server = HttpServer(8080, OnRequest);
 server:run();

@@ -14,7 +14,7 @@ local FileStream = require("FileStream");
 local ScreenCapture = require("ScreenCapture");
 
 local utils = require("utils")
-local zlib = require ("zlib")
+local Compressor = require("Compressor")
 
 local UIOSimulator = require("UIOSimulator")
 
@@ -39,14 +39,14 @@ local ImageHeight = captureHeight * 1.0;
 local ImageBitCount = 16;
 
 local net = Network();
-local screenCap = ScreenCapture();
+local screenCap = ScreenCapture({BitCount = ImageBitCount});
+local chomper = Compressor();
 
 --[[
 	Application Functions
 --]]
 
 
--- Serve the screen up as a bitmap image (.bmp)
 
 local getContentSize = function(width, height, bitcount, alignment)
   alignment = alignment or 4
@@ -63,29 +63,42 @@ end
 local filesize = getContentSize(ImageWidth, ImageHeight, ImageBitCount);
 local zstream = MemoryStream.new(filesize);
 
-
+-- Serve the screen up as a bitmap image (.bmp)
 local getCompressedSingleShot = function(response)
   screenCap:captureScreen();
 
   zstream:Seek(0);
-  local compressedLen = ffi.new("int[1]", zstream.Length);
-  local err = zlib.compress(zstream.Buffer,   compressedLen, 
+
+  local bytesWritten, err = chomper:compress(zstream.Buffer,   zstream.Length, 
       screenCap.CapturedStream.Buffer, screenCap.CapturedStream:GetPosition() );
 
-  zstream.BytesWritten = compressedLen[0];
-  local contentlength = zstream.BytesWritten;
+
+--print("getCompressedSingleShot, compress, ERROR: ", bytesWritten, err);
+
+  zstream.BytesWritten = bytesWritten;
 
   local headers = {
-    ["Content-Length"] = tostring(contentlength),
-    ["Content-Type"] = "image/bmp",
-    ["Content-Encoding"] = "deflate",
+    ["Connection"]      = "Keep-Alive",
+    ["Content-Length"]  = bytesWritten,
+    ["Content-Type"]    = "image/bmp",
+    ["Content-Encoding"]= "gzip",
   }
 
   response:writeHead("200", headers);
   response:WritePreamble();
 
+  response.DataStream:writeBytes(zstream.Buffer, bytesWritten);
 
-  response.DataStream:writeBytes(zstream.Buffer, contentlength);
+
+  -- reset the compressor
+  local obj, err = chomper:reset();
+  if not obj then
+    print("RESET Compressor: ", err);
+    return false, err;
+  end
+
+
+--print("== getCompressedSingleShot: END ==");
 
   return true;
 end
@@ -97,13 +110,13 @@ local getSingleShot = function(response)
   local contentlength = screenCap.CapturedStream:GetPosition();
 
   local headers = {
+    ["Connection"]      = "Keep-Alive",
     ["Content-Length"] = tostring(contentlength),
 	  ["Content-Type"] = "image/bmp",
   }
 
   response:writeHead("200", headers);
   response:WritePreamble();
-
 
   response.DataStream:writeBytes(screenCap.CapturedStream.Buffer, contentlength);
 
@@ -134,8 +147,10 @@ local handleStartupRequest = function(request, response)
   -- read the entire contents
   if not startupContent then
     -- load the file into memory
+    local fs, err = io.open("viewcanvas.htm")
+    --local fs, err = io.open("viewscreen_simple.htm")
     --local fs, err = io.open("viewscreen.htm")
-    local fs, err = io.open("sharescreen.htm")
+    --local fs, err = io.open("sharescreen.htm")
 
     if not fs then
       response:writeHead("500")
@@ -157,7 +172,7 @@ local handleStartupRequest = function(request, response)
       ["websocketbase"] = request:GetHeader("x-bhut-ws-url-base"),
       ["serviceport"]   = serviceport,
 
-      ["frameinterval"] = 1000,
+      ["frameinterval"] = 100,
       ["capturewidth"]	= captureWidth,
       ["captureheight"]	= captureHeight,
       ["imagewidth"]		= ImageWidth,
@@ -166,22 +181,21 @@ local handleStartupRequest = function(request, response)
       ["screenheight"]	= ScreenHeight,
     }
 
-print("== HEADERS == ")
-for key,value in pairs(request.Headers) do
-  print(key, value);
-end
-print("--------------");
 
---print("TEMPLATE CONSTRUCTION")
---for key, value in pairs(subs) do
---  print(key, value)
---end
+print("TEMPLATE CONSTRUCTION")
+for key, value in pairs(subs) do
+  print(key, value)
+end
 
     startupContent = string.gsub(content, "%<%?(%a+)%?%>", subs)
   end
 
   -- send the content back to the requester
-  response:writeHead("200",{["Content-Type"]="text/html"})
+  local respHeaders = {
+    ["Content-Type"]="text/html",
+    ["Connection"]="Keep-Alive",
+    };
+  response:writeHead("200", respHeaders);
   response:writeEnd(startupContent);
 
   return true
@@ -221,6 +235,12 @@ local server = nil;
 
 local OnRequest = function(param, request, response)
 print("OnRequest: ", request.Url.path);
+--print("== HEADERS == ")
+--for key,value in pairs(request.Headers) do
+--  print(key, value);
+--end
+--print("--------------");
+
 
   local success = nil;
 
@@ -230,9 +250,12 @@ print("OnRequest: ", request.Url.path);
     -- For this case, return after handing off the socket
     -- as we don't want the socket to be recycled from here
     return true;
-  elseif request.Url.path == "/screen.bmp" then
-    --success, err = getSingleShot(response, true);
+  elseif request.Url.path == "/startup.bmp" then
     success, err = getCompressedSingleShot(response);
+  elseif request.Url.path == "/screen.bmp" then
+    success, err = getCompressedSingleShot(response);
+  elseif request.Url.path == "/xscreen.bmp" then
+    success, err = getSingleShot(response);
   elseif request.Url.path == "/screen" then
     success, err = handleStartupRequest(request, response)
   elseif request.Url.path == "/favicon.ico" then
