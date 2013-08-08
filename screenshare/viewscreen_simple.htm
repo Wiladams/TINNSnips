@@ -16,43 +16,36 @@
       		ImageHeight = <?imageheight?>
 
           Authority = '<?authority?>'
-          HttpBase = '<?httpbase?>'
-          WebSocketBase = '<?websocketbase?>'
           HostIp = '<?hostip?>'
           ServicePort = <?serviceport?>
 
 
-      		function eventWindowLoaded()
-      		{
-        		document.getElementById("screendiv").focus();
-            	// Capture the image once every few milliseconds
-            	setInterval("refreshImage()", FrameInterval); 
-      		}
+      function eventWindowLoaded()
+      {
+        document.getElementById("screendiv").focus();
+        
+        // Capture the image once every few milliseconds
+        setInterval("refreshImage()", FrameInterval); 
+      }
 
 			function refreshImage() 
 			{
    				if (!document.images) 
    					return;
    				
-          var asrc = "./screen.bmp?"+Math.random();
-          if (HttpBase != "<?httpbase?>") {
-            alert(HttpBase);
-            asrc = HttpBase + 'http/' + Authority + asrc;
-          }
-
-   				document.images['myScreen'].src = asrc;
+          document.images['myScreen'].src = './screen.bmp?' + Math.random();
 			}
 		</script>
 	</head>
 
 	<body style="margin:0px">
     	<div id="screendiv" tabindex="-1" 
-    		style="width:" + ImageWidth + "px; height:"+ImageHeight+"px; margin: 0px 0px 0px 0px; border:0px; groove;" 
+    		style="width:<?imagewidth?>px; height:<?imageheight?>px; margin: 0px 0px 0px 0px; background:yellow; border:0px; groove;" 
     		onselectstart="return false" 
     		onmousedown="return false" 
     		onkeydown="return false" >
 
-			<img src="/screen.bmp" name="myScreen">
+			<img src="/startup.bmp" name="myScreen">
 		</div>
 	</body>
 </html>

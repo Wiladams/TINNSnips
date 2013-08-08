@@ -45,6 +45,7 @@ ScreenCapture.init = function(self, params)
     params.HeightSrc = params.HeightSrc or ScreenHeight;
     
     -- destination parameters
+    params.BitCount = params.BitCount or ImageBitCount;
 	params.XOriginDest = params.CaptureXOrigin or 0;
     params.YOriginDest = params.CaptureYOrigin or 0;
     params.WidthDest = params.WidthDest or ImageWidth;
@@ -53,15 +54,14 @@ ScreenCapture.init = function(self, params)
 	params.hdcScreen = GDI32.CreateDCForDefaultDisplay();
 
 	-- The bitmap the screen will be copied into
-    params.hbmScreen = GDIDIBSection(params.WidthDest, params.HeightDest, ImageBitCount);
+    params.hbmScreen = GDIDIBSection(params.WidthDest, params.HeightDest, params.BitCount);
 
 
 	setmetatable(params, ScreenCapture_mt);
 
   	local width = params.hbmScreen.Info.bmiHeader.biWidth;
   	local height = params.hbmScreen.Info.bmiHeader.biHeight;
-  	local bitcount = params.hbmScreen.Info.bmiHeader.biBitCount;
-  	local rowsize = GDI32.GetAlignedByteCount(width, bitcount, 4);
+  	local rowsize = GDI32.GetAlignedByteCount(width, params.BitCount, 4);
   	params.pixelarraysize = rowsize * math.abs(height);
     params.pixeloffset = 54;
     params.filesize = 54+params.pixelarraysize;

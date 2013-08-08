@@ -10,7 +10,7 @@ local chunkiter = require ("HttpChunkIterator");
 local FileStream = require("FileStream");
 
 
-local resource = "http://localhost:8080/screen.bmp"
+local resource = "http://localhost:8080/xscreen.bmp"
 local urlparts = URL.parse(resource, {port="80", path="/", scheme="http"});
 local hostname = urlparts.host
 local authority = urlparts.authority;
@@ -57,10 +57,10 @@ local snapscreen = function(stream, fileroot, showheaders)
 end
 
 local main = function()
-	for i=1,10 do
+	for i=1,1 do
 		print("snap frame: ", i);
 		local filename = "screen"..tostring(i)..".bmp"
-		snapscreen(resourcestream, filename, true);
+		snapscreen(resourcestream, filename, false);
 	end
 end
 

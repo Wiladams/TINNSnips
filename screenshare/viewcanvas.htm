@@ -1,0 +1,50 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="myCanvas" 
+      width="<?screenwidth?>" 
+      height="<?screenheight?>">
+    </canvas>
+    
+    <script>
+      var FrameInterval = <?frameinterval?>
+      var HttpBase = "<?httpbase?>"
+
+      var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+      var imageObj = new Image();
+
+      var onImageLoad = function()
+      {
+        context.drawImage(imageObj, 0, 0);
+
+        setTimeout(function() {loadImage();}, FrameInterval);
+      }
+
+
+      function loadImage()
+      {
+          imageObj.onload = onImageLoad;
+
+          var asrc = "./screen.bmp?"+Math.random();
+          if (HttpBase != "<?httpbase?>") 
+          {
+              alert(HttpBase);
+              asrc = HttpBase + 'http/' + Authority + asrc;
+          }
+          imageObj.src = asrc;
+      }
+
+
+      loadImage();
+    </script>
+  </body>
+</html>

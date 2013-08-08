@@ -37,7 +37,11 @@
    				if (!document.images) 
    					return;
    				
-          		var asrc = HttpBase + 'http/' + Authority + '/screen.bmp?' + Math.random();
+          		var asrc = "./screen.bmp?"+Math.random();
+          		if (HttpBase != "<?httpbase?>") {
+            		asrc = HttpBase + 'http/' + Authority + asrc;
+          		}
+
    				document.images['myScreen'].src = asrc;
 			}
 		</script>
