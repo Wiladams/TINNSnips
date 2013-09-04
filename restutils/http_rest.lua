@@ -15,7 +15,7 @@ local sout = FileStream.new(io.stdout)
 
 
 local http_get = function(resource, showheaders, onfinish)
---print("http_get: ", resource, showheaders, onfinish)
+print("http_get: ", resource, showheaders, onfinish)
 	if not resource then
 		return onfinish(nil, "no resource specified");
 	end
@@ -26,7 +26,7 @@ local http_get = function(resource, showheaders, onfinish)
 	local path = urlparts.path
 	local port = urlparts.port
 
---	print("URL: ", hostname, port, path);
+	print("URL: ", hostname, port, path);
 
 	-- Open up a stream to get the real content
 	local resourcestream, err = IOCPNetStream:create(hostname, port)

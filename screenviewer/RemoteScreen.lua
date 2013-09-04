@@ -1,37 +1,56 @@
 
+
+local ffi = require("ffi")
 local MemoryStream = require("MemoryStream");
 local BinaryStream = require("BinaryStream");
-local NetStream = require("NetStream")
-local HttpRequest = require ("HttpRequest");
+local IOCPNetStream = require("IOCPNetStream")
+
+local WebRequest = require ("WebRequest");
+local WebResponse = require("WebResponse")
 local URL = require ("url");
 local zlib = require "zlib"
+local chunkiter = require("HttpChunkIterator")
 
-local RemoteScreen_t = {}
+
+
+local RemoteScreen = {}
+setmetatable(RemoteScreen, {
+	__call = function(self, ...)
+		return self:create(...)
+	end,
+})
+
 local RemoteScreen_mt = {
-	__index = RemoteScreen_t,
+	__index = RemoteScreen,
 }
 
-local RemoteScreen = function(url)
+
+RemoteScreen.init = function(self, url)
 	local urlparts = URL.parse(url, {port="80", path="/", scheme="http"});
 
 	local obj = {
 		Url = urlparts;
 		Path = urlparts.path;
 		Port = urlparts.port;
-		ScreenRequest = HttpRequest.new("GET", urlparts.path, {["Host"] = urlparts.host,}, nil),	
-		ZStream = MemoryStream.new(256*1024);
-		ImageStream = MemoryStream.new(1024*1024*1024);
+		ScreenRequest = WebRequest("GET", urlparts.path, {["Host"] = urlparts.host,}, nil),	
+		ZStream = MemoryStream(256*1024);
+		ImageStream = MemoryStream(1024*1024*1024);
 	}
 
 	setmetatable(obj, RemoteScreen_mt);
 
 	-- make connection
-	obj.Connection = NetStream.Open(urlparts.host, urlparts.port);
+	local err = nil
+	obj.Connection, err = IOCPNetStream:create(urlparts.host, urlparts.port);
 	if not obj.Connection then
-		return nil
+		return nil, err
 	end
 
 	return obj
+end
+
+RemoteScreen.create = function(self, url)
+	return self:init(url);
 end
 
 
@@ -67,35 +86,34 @@ local readImage = function(stream)
 	return bminfo, pixeloffset;
 end
 
-RemoteScreen_t.GetCurrentImage = function(self)
+RemoteScreen.GetCurrentImage = function(self)
 	-- issue the request
 	local success, err = self.ScreenRequest:Send(self.Connection);
 
-	--print("GetCurrentImage: ", success, err);
+	print("GetCurrentImage: ", success, err);
 
 	if not success then
 		return false, err
 	end
 
 	-- get the response
-	local response, err = HttpResponse.Parse(self.Connection);
+	local response, err = WebResponse:Parse(self.Connection);
 			
+	if not response then
+		return false, string.format("WebResponse:Parse(): %d",err)
+	end
+
+	local encoding = response:GetHeader("Content-Encoding")
+	print("Content-Encoding: ", encoding);
 
 	self.ZStream:Seek(0);
-	local result
+	
 
-	if response then
-		-- successful read of preamble
-		-- so print it out, and keep out of queue
-		--response:WritePreamble(sout);
 
-		for chunk, err in chunkiter.ReadChunks(response) do
-			-- read chunks stuffing into memory stream
-			self.ZStream:WriteString(chunk);
-		end
-		result = "OK";
-	else
-		result = "FAILURE:"..tostring(err);
+	-- read the chunks of the response
+	for chunk, err in chunkiter.ReadChunks(response) do
+		-- read chunks stuffing into memory stream
+		self.ZStream:WriteString(chunk);
 	end
 
 --print("Bytes in ZStream: ", self.ZStream:GetPosition(), result);
@@ -106,7 +124,7 @@ RemoteScreen_t.GetCurrentImage = function(self)
 --print("UNCOMPRESS: ", err, destLen[0])
 
 	if err ~= 0 then
-		return nil, err
+		return false, err
 	end
 
 	self.ImageStream.BytesWritten = destLen[0];
@@ -114,7 +132,7 @@ RemoteScreen_t.GetCurrentImage = function(self)
 
 	local info, pixeloffset = readImage(self.ImageStream)
 	if not info then
-		return nil, pixeloffset
+		return false, pixeloffset
 	end
 
 	local pixels = self.ImageStream.Buffer + pixeloffset;

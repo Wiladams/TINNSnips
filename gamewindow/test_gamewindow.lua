@@ -78,7 +78,7 @@ end
 local appwin = GameWindow({
 		Title = "Game Window",
 		KeyboardInteractor = keyboardinteraction,
-		FrameRate = 120,
+		FrameRate = 30,
 		OnTickDelegate = ontick,
 		Extent = {1024,768},
 		})

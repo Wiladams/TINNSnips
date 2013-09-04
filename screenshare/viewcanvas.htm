@@ -22,6 +22,29 @@
       var context = canvas.getContext('2d');
       var imageObj = new Image();
 
+
+
+      // shim layer with setTimeout fallback
+      window.requestAnimFrame = (function(){
+        return  window.requestAnimationFrame       ||
+          window.webkitRequestAnimationFrame ||
+          window.mozRequestAnimationFrame    ||
+          function( callback ){
+            window.setTimeout(callback, 1000 / 30);
+          };
+      })();
+
+      // usage:
+      // instead of setInterval(render, 16) ....
+
+      //(function animloop(){
+      //  requestAnimFrame(animloop);
+      //  render();
+      //})();
+      
+      // place the rAF *before* the render() to assure as close to
+      // 60fps with the setTimeout fallback.
+
       var onImageLoad = function()
       {
         context.drawImage(imageObj, 0, 0);

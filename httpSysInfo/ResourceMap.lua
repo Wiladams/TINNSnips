@@ -1,4 +1,5 @@
 local handlers = require "ResourceHandlers"
+local HandleFileSystem = require("HandleFileSystem")
 
 local ResourceMap = {
 	["/"]		= {name="/",
@@ -15,12 +16,8 @@ local ResourceMap = {
 	};
 
 
-	["/desktop"] 			= {name="/desktop",
-		GET					= handlers.HandleDesktopGET,
-	};
-
 	["/files"] 				= {name="/files",
-		GET					= handlers.HandleFilesGET,
+		GET					= HandleFileSystem.HandleFilesGET,
 	};
 
 	["/processes"] 			= {name="/processes",

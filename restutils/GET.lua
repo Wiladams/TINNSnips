@@ -7,7 +7,8 @@ local main = function()
 	local url = arg[1];
 	local showheaders = arg[2] or false;
 
-	onfinish = function(result)
+	onfinish = function(result, err)
+		print("onfinish: ", result, err)
 		stop();
 	end
 
