@@ -11,7 +11,7 @@ local WebRequest = require ("WebRequest");
 local WebResponse = require("WebResponse");
 local chunkiter = require ("HttpChunkIterator");
 
-local sout = FileStream.new(io.stdout)
+local sout = FileStream()
 
 
 local http_get = function(resource, showheaders, onfinish)
