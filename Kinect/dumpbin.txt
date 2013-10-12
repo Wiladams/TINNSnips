@@ -1,0 +1,31 @@
+local ffi = require("ffi")
+
+local NuiLib = ffi.load("kinect10")
+
+return {
+NuiCameraElevationGetAngle = NuiLib.NuiCameraElevationGetAngle,
+NuiCameraElevationSetAngle = NuiLib.NuiCameraElevationSetAngle,
+NuiCreateCoordinateMapperFromParameters = NuiLib.NuiCreateCoordinateMapperFromParameters,
+NuiCreateDepthFilter = NuiLib.NuiCreateDepthFilter,
+NuiCreateSensorById = NuiLib.NuiCreateSensorById,
+NuiCreateSensorByIndex = NuiLib.NuiCreateSensorByIndex,
+NuiGetAudioSource = NuiLib.NuiGetAudioSource,
+NuiGetSensorCount = NuiLib.NuiGetSensorCount,
+NuiImageGetColorPixelCoordinatesFromDepthPixel = NuiLib.NuiImageGetColorPixelCoordinatesFromDepthPixel,
+NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution = NuiLib.NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution,
+NuiImageStreamGetImageFrameFlags = NuiLib.NuiImageStreamGetImageFrameFlags,
+NuiImageStreamGetNextFrame = NuiLib.NuiImageStreamGetNextFrame,
+NuiImageStreamOpen = NuiLib.NuiImageStreamOpen,
+NuiImageStreamReleaseFrame = NuiLib.NuiImageStreamReleaseFrame,
+NuiImageStreamSetImageFrameFlags = NuiLib.NuiImageStreamSetImageFrameFlags,
+NuiInitialize = NuiLib.NuiInitialize,
+NuiSetDeviceStatusCallback = NuiLib.NuiSetDeviceStatusCallback,
+NuiSetFrameEndEvent = NuiLib.NuiSetFrameEndEvent,
+NuiShutdown = NuiLib.NuiShutdown,
+NuiSkeletonCalculateBoneOrientations = NuiLib.NuiSkeletonCalculateBoneOrientations,
+NuiSkeletonGetNextFrame = NuiLib.NuiSkeletonGetNextFrame,
+NuiSkeletonSetTrackedSkeletons = NuiLib.NuiSkeletonSetTrackedSkeletons,
+NuiSkeletonTrackingDisable = NuiLib.NuiSkeletonTrackingDisable,
+NuiSkeletonTrackingEnable = NuiLib.NuiSkeletonTrackingEnable,
+NuiTransformSmooth = NuiLib.NuiTransformSmooth,
+}

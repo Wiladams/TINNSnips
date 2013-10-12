@@ -28,11 +28,17 @@ local RemoteScreen_mt = {
 RemoteScreen.init = function(self, url)
 	local urlparts = URL.parse(url, {port="80", path="/", scheme="http"});
 
+
 	local obj = {
 		Url = urlparts;
 		Path = urlparts.path;
 		Port = urlparts.port;
-		ScreenRequest = WebRequest("GET", urlparts.path, {["Host"] = urlparts.host,}, nil),	
+		ScreenRequest = WebRequest("GET", urlparts.path, 
+			{
+				["Host"] = urlparts.host,
+				["Accept-Encoding"] = "deflate",
+			}, 
+			nil),	
 		ZStream = MemoryStream(256*1024);
 		ImageStream = MemoryStream(1024*1024*1024);
 	}

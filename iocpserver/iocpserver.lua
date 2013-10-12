@@ -1,7 +1,7 @@
 -- iocpserver.lua
 local HttpServer = require("HttpServer");
 
-local StaticService = require("StaticService");
+local FileService = require("FileService");
 
 local pingtemplate = [[
 <html>
@@ -23,7 +23,7 @@ local OnRequest = function(param, request, response)
 		response:writeEnd(pingtemplate);
 	else
 		local filename = './wwwroot'..request.Url.path;
-		StaticService.SendFile(filename, response);
+		FileService.SendFile(filename, response);
 	end
 
 	server:HandleRequestFinished(request);

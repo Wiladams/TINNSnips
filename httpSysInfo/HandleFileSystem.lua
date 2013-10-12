@@ -1,7 +1,7 @@
 -- /files
 local FileSystem = require("FileSystem");
 local wfs = FileSystem("c:");
-local StaticService = require("StaticService");
+local FileService = require("FileService");
 local URL = require("url")
 
 local function replacedotdot(s)
@@ -32,7 +32,7 @@ print("REL PATH: ", relativePath);
 		-- if it's a file, then return the file using
 		-- the static handler
 		if not fsItem:isDirectory() then
-    		StaticService.SendFile(relativePath, response);
+    		FileService.SendFile(relativePath, response);
     		return recycleRequest(request);
 		end
 	end

@@ -1,6 +1,6 @@
 local JSON = require("dkjson");
 local pages = require("pages");
-local StaticService = require("StaticService");
+local FileService = require("FileService");
 local Query = require("Query");
 local utils = require("utils");
 local OSProcess = require("OSProcess");
@@ -31,19 +31,19 @@ Handlers.HandleDefaultGET = function(request, response)
 	response:writeHead("200")
 	response:writeEnd(pages.index);
 
-	-- StaticService.SendFile("."..urlparts.path, response);
+	-- FileService.SendFile("."..urlparts.path, response);
     return recycleRequest(request);
 end
 
 -- favicon.ico
 Handlers.HandleFaviconGET = function(request, response)
-    StaticService.SendFile("favicon.ico", response)
+    FileService.SendFile("favicon.ico", response)
 
     return recycleRequest(request);
 end
 
 Handlers.HandleJQueryGET = function(request, response)
-    StaticService.SendFile("jquery.js", response)
+    FileService.SendFile("jquery.js", response)
 
     return recycleRequest(request);
 end
@@ -162,7 +162,7 @@ local station = Workstation();
 			response:writeEnd(pages.login);
 		end
 	else
-		StaticService.SendFile("."..urlparts.path, response);
+		FileService.SendFile("."..urlparts.path, response);
 	end
 --]]
 
