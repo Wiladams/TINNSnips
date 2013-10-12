@@ -61,7 +61,7 @@ end
 
 
 local filesize = getContentSize(ImageWidth, ImageHeight, ImageBitCount);
-local zstream = MemoryStream.new(filesize);
+local zstream = MemoryStream(filesize);
 
 -- Serve the screen up as a bitmap image (.bmp)
 local getCompressedSingleShot = function(response)

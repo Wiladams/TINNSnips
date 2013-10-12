@@ -68,7 +68,7 @@ ScreenCapture.init = function(self, params)
 
     local streamsize = GDI32.GetAlignedByteCount(params.filesize, 8, 4);
 	
-	params.CapturedStream = MemoryStream.new(streamsize);
+	params.CapturedStream = MemoryStream(streamsize);
 
 print("== Screen Capture ==")
 print("Source: ", params.XOriginSrc, params.YOriginSrc, params.WidthSrc, params.HeightSrc);

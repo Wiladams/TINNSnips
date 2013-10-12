@@ -11,7 +11,6 @@ local StopWatch = require "StopWatch"
 local chunkiter = require "HttpChunkIterator"
 local MemoryStream = require("MemoryStream");
 local BinaryStream = require("BinaryStream");
-local NetStream = require ("NetStream");
 local URL = require ("url");
 local HttpRequest = require ("WebRequest");
 local HttpResponse = require("WebResponse");
