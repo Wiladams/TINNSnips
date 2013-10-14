@@ -11,7 +11,6 @@ local StopWatch = require "StopWatch"
 local chunkiter = require "HttpChunkIterator"
 local MemoryStream = require("MemoryStream");
 local BinaryStream = require("BinaryStream");
-local NetStream = require ("NetStream");
 local URL = require ("url");
 local HttpRequest = require ("WebRequest");
 local HttpResponse = require("WebResponse");
@@ -27,7 +26,7 @@ local sw = StopWatch();
 
 
 -- create an instance of a remote screen
-local screenUrl = arg[1] or "http://localhost:8080/screen.bmp";
+local screenUrl = arg[1] or "http://127.0.0.1:8080/screen.bmp";
 local screen, err = RemoteScreen(screenUrl);
 
 print("RemoteScreen: ", screen, err)

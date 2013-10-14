@@ -3,7 +3,7 @@ local IOCPSocket = require("IOCPSocket");
 local NetStream = require("IOCPNetStream");
 local HttpRequest = require("WebRequest");
 local HttpResponse = require("WebResponse");
-local StaticService = require("StaticService");
+local FileService = require("FileService");
 
 local URL = require("url");
 
@@ -37,7 +37,7 @@ print(string.format("PATH: %s", urlparts.path));
 	
 		local response = HttpResponse:OpenResponse(stream);
 
-		StaticService.SendFile(filename, response);
+		FileService.SendFile(filename, response);
 	end
 end
 

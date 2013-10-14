@@ -2,7 +2,7 @@
 local ffi = require "ffi"
 
 local HttpServer = require("HttpServer")
-local StaticService = require("StaticService");
+local FileService = require("FileService");
 local WebSocket = require("WebSocket")
 local Network = require("Network")
 
@@ -61,7 +61,7 @@ end
 
 
 local filesize = getContentSize(ImageWidth, ImageHeight, ImageBitCount);
-local zstream = MemoryStream.new(filesize);
+local zstream = MemoryStream(filesize);
 
 -- Serve the screen up as a bitmap image (.bmp)
 local getCompressedSingleShot = function(response)
@@ -259,9 +259,9 @@ print("OnRequest: ", request.Url.path);
   elseif request.Url.path == "/screen" then
     success, err = handleStartupRequest(request, response)
   elseif request.Url.path == "/favicon.ico" then
-    success, err = StaticService.SendFile("favicon.ico", response)
+    success, err = FileService.SendFile("favicon.ico", response)
   elseif request.Url.path == "/jquery.js" then
-    success, err = StaticService.SendFile("jquery.js", response)
+    success, err = FileService.SendFile("jquery.js", response)
   else
 	  response:writeHead("404");
 	  success, err = response:writeEnd();
