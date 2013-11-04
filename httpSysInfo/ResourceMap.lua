@@ -1,9 +1,24 @@
 local handlers = require "ResourceHandlers"
 local HandleFileSystem = require("HandleFileSystem")
+Runtime = require("Runtime")
+
 
 local ResourceMap = {
-	["/"]		= {name="/",
+	["/exit"]				= {name="/exit",
+		GET 				= function(request, response)
+								response:writeHead(204);
+								response:writeEnd();
+								
+								Runtime.stop();
+							end,
+	};
+
+	["/"]					= {name="/",
 		GET 				= handlers.HandleLoginGET,
+	};
+
+	["/acebuilds"] = {name="/acebuilds",
+		GET 				= handlers.HandleAceBuildGET,
 	};
 
 	["/favicon.ico"]		= {name="/favicon.ico",
@@ -11,7 +26,7 @@ local ResourceMap = {
 	};
 	
 
-	["/jquery.js"]		= {name="/jquery.js",
+	["/jquery.js"]			= {name="/jquery.js",
 		GET 				= handlers.HandleJQueryGET,
 	};
 
@@ -20,12 +35,24 @@ local ResourceMap = {
 		GET					= HandleFileSystem.HandleFilesGET,
 	};
 
+	["/memory"] 				= {name="/memory",
+		GET					= handlers.HandleMemoryGET,
+	};
+
 	["/processes"] 			= {name="/processes",
 		GET					= handlers.HandleProcessesGET,
 	};
 
+	["/processes/data"] 			= {name="/processes/data",
+		GET					= handlers.HandleProcessesGETData,
+	};
+
 	["/services"] 			= {name="/services",
 		GET					= handlers.HandleServicesGET,
+	};
+
+	["/services/data"] 		= {name="/services/data",
+		GET 				= handlers.HandleServicesGETData,
 	};
 
 }

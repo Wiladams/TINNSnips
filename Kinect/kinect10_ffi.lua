@@ -1,4 +1,8 @@
 local ffi = require("ffi")
+local bit = require("bit")
+local band = bit.band;
+local bor = bit.bor;
+local lshift = bit.lshift
 
 local WTypes = require("WTypes")
 
@@ -487,7 +491,13 @@ typedef struct _NUI_TRANSFORM_SMOOTH_PARAMETERS
 
 
 
+local __HRESULT_FROM_WIN32 = function(x) 
+  if x <= 0 then
+    return ((x))
+  end
 
+  return bor(band(x, 0x0000FFFF), bor(lshift(FACILITY_WIN32, 16), 0x80000000))
+end
 
 return {
   NUI_INITIALIZE_FLAG_USES_AUDIO                =  0x10000000,

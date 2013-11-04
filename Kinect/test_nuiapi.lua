@@ -4,9 +4,6 @@ local kinect = require("kinect10_ffi")
 local IOProcessor = require("IOProcessor")
 
 
-local pCount = ffi.new("int[1]");
-
-local res = kinect.NuiGetSensorCount(pCount);
 
 local testangle = function()
 	local plAngleDegrees = ffi.new("LONG[1]")
@@ -28,11 +25,13 @@ local testangle = function()
 	--res = kinect.NuiCameraElevationSetAngle(1)
 	res = kinect.NuiCameraElevationSetAngle(kinect.NUI_CAMERA_ELEVATION_MAXIMUM)
 	print("Angle set to MAX: ", res)
+	wait(300);
 
 	-- set it to min
 	res = kinect.NuiCameraElevationSetAngle(kinect.NUI_CAMERA_ELEVATION_MINIMUM)
 	print("Angle set to MIN: ", res)
-
+	wait(300)
+	
 	-- set it back to zero
 	res = kinect.NuiCameraElevationSetAngle(0)
 	print("angle  back to zero: ", res)
@@ -41,6 +40,10 @@ end
 
 
 local main = function()
+	local pCount = ffi.new("int[1]");
+
+	local res = kinect.NuiGetSensorCount(pCount);
+
 print("Sensor Count: ", res, pCount[0]);
 
 local dwFlags = kinect.NUI_INITIALIZE_FLAG_USES_COLOR;

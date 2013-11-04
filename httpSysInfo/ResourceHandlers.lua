@@ -1,3 +1,6 @@
+
+
+local SysInfo = require("SysInfo");
 local JSON = require("dkjson");
 local pages = require("pages");
 local FileService = require("FileService");
@@ -6,6 +9,9 @@ local utils = require("utils");
 local OSProcess = require("OSProcess");
 local SCManager = require("SCManager");
 local HandleFileSystem = require("HandleFileSystem")
+local FileService = require("FileService")
+local URL = require("url")
+local Html = require("Html")
 
 
 local Handlers = {}
@@ -13,6 +19,8 @@ local Handlers = {}
 -- /
 -- /login
 Handlers.HandleLoginGET = function(request, response)
+	Runtime.writeLine("GET: ", request.Resource)
+
 	local auth = request:GetHeader("authorization");
 
 	if not auth then
@@ -20,36 +28,34 @@ Handlers.HandleLoginGET = function(request, response)
 		response:writeHead("401", headers);
 		response:writeEnd();
 	else
+		local pageContent = pages.getIndexPage();
+
 		response:writeHead("200");
-		response:writeEnd(pages.index);
+		response:writeEnd(pageContent);
 	end
 
-    return recycleRequest(request);
 end
 
 Handlers.HandleDefaultGET = function(request, response)
+	Runtime.writeLine("HandleDefaultGET - BEGIN")
+
 	response:writeHead("200")
 	response:writeEnd(pages.index);
-
-	-- FileService.SendFile("."..urlparts.path, response);
-    return recycleRequest(request);
 end
 
 -- favicon.ico
 Handlers.HandleFaviconGET = function(request, response)
+	Runtime.writeLine("HandleFaviconGET - BEGIN")
+    
     FileService.SendFile("favicon.ico", response)
 
-    return recycleRequest(request);
 end
 
 Handlers.HandleJQueryGET = function(request, response)
     FileService.SendFile("jquery.js", response)
-
-    return recycleRequest(request);
 end
 
-
-Handlers.HandleServicesGET = function(request, response)
+local getServiceData = function(request)
 	local filterfunc;
 
 	if request.Url.query then
@@ -75,18 +81,96 @@ Handlers.HandleServicesGET = function(request, response)
 		return res;
 	end
 
-	local res = getServices(filterfunc);
-	local jsonstr = JSON.encode(res, {indent=true});
+	return getServices(filterfunc)
+end
 
-	--print("echo")
-	response:writeHead("200")
-	response:writeEnd(jsonstr);
+local servicesTemplate = [[
+<html>
+  <head><title>Services</title>
+  	<style>
+		table
+		{
+			border-collapse:collapse;
+		}
+		table,th,td
+		{
+			border:1px solid black;
+		}
+	</style>
+  </head>
+  <body>
+  <table summary="List of services available on machine">
+    <colgroup align="center">
+    <colgroup align="left">
+    <colgroup align="left">
+    <colgroup align="left">
+    <colgroup align="left">
+  <TR>
+  	<TH colspan="5" scope="colgroup">Machine Services</TH>
+  <TR>
+    <TH scope="col" abbr="ID">Service ID</TH>
+    <TH scope="col" abbr="Type">Service Type</TH>
+    <TH scope="col" abbr="Name">Service Name</TH>
+    <TH scope="col" abbr="Description">Display Name</TH>
+    <TH scope="col" abbr="State">State</TH>
+  </TR>
+    <TBODY>
+	<?tablebody?>
+    </TBODY>
+  </table>
+</body>
+</html>
+]]
 
-	return recycleRequest(request);
+Handlers.HandleServicesGETData = function(request, response)
+	Runtime.writeLine("HandleServicesGETData - BEGIN")
+
+	local body = JSON.encode(getServiceData(request), {indent=true});
+
+	local headers = {
+		["Content-Type"] = "application/json",
+	}
+	
+	response:writeHead("200", headers)
+	response:writeEnd(body);
+end
+
+Handlers.HandleServicesGET = function(request, response)
+	Runtime.writeLine("HandleServicesGET - BEGIN")
+	
+	local data = getServiceData(request)
+
+--[[
+ProcessId
+ServiceType
+ServiceName
+DisplayName
+State
+--]]
+	local createBody = function()
+		local tbody = {}
+		
+		for _,row in ipairs(data) do
+			local rowstr = string.format([[<tr><td>%d<td>%s<td>%s<td>%s<td>%s]], 
+				row.ProcessId, row.ServiceType, row.ServiceName, row.DisplayName, row.State)
+			table.insert(tbody, rowstr)
+		end
+
+		return Html:fillTemplate(servicesTemplate, {tablebody = table.concat(tbody)})
+	end
+
+
+	local headers = {
+		["Content-Type"] = "text/html",
+	}
+	
+	response:writeHead("200", headers)
+	response:writeEnd(createBody());
+
 end
 
 -- /processes
-Handlers.HandleProcessesGET = function(request, response)
+local getProcessData = function(request)
 	local filterfunc;
 
 	if request.Url.query then
@@ -111,59 +195,174 @@ Handlers.HandleProcessesGET = function(request, response)
 		return res;
 	end
 
-	local res = getProcesses(filterfunc);
-	local jsonstr = JSON.encode(res, {indent=true});
+	return getProcesses(filterfunc);
+end
 
-	response:writeHead("200")
-	response:writeEnd(jsonstr);
 
-	return recycleRequest(request);
+Handlers.HandleProcessesGETData = function(request, response)
+	Runtime.writeLine("HandleProcessesGETData - BEGIN")
+
+	local body = JSON.encode(getProcessData(request), {indent=true});
+
+	local headers = {
+		["Content-Type"] = "application/json",
+	}
+	
+	response:writeHead("200", headers)
+	response:writeEnd(body);
+
+end
+
+
+
+Handlers.HandleProcessesGET = function(request, response)
+	Runtime.writeLine("HandleProcessesGET - BEGIN")
+	
+	local data = getProcessData(request)
+
+--[[
+id
+sessionId
+isActive
+priorityClass
+filename
+--]]
+	local createBody = function()
+		local body = {}
+		table.insert(body,
+[[
+<html>
+  <head><title>Services</title>
+	<style>
+		table
+		{
+			border-collapse:collapse;
+		}
+		table,th,td
+		{
+			border:1px solid black;
+		}
+	</style>
+  </head>
+  <body>
+  <table summary="List of services available on machine>
+    <colgroup align="left">
+    <colgroup align="left">
+    <colgroup align="left">
+    <colgroup align="left">
+    <colgroup align="left">
+  <TR>
+  	<TH colspan="5" scope="colgroup">Machine Processes</TH>
+  <TR>
+    <TH scope="col" abbr="ID">Process ID</TH>
+    <TH scope="col" abbr="Session">Session ID</TH>
+    <TH scope="col" abbr="Active">Active</TH>
+    <TH scope="col" abbr="Priority">Priority</TH>
+    <TH scope="col" abbr="File">File</TH>
+  </TR>
+]])
+		
+		for _,row in ipairs(data) do
+			local rowstr = string.format([[<tr><td>%d<td>%d<td>%s<td>%d<td>%s]], 
+				row.id, row.sessionId, tostring(row.isActive), row.priorityClass, row.filename)
+			table.insert(body, rowstr)
+		end
+
+table.insert(body,
+[[
+  </table>
+</body>
+</html>
+]])
+		return table.concat(body)
+	end
+
+
+	local headers = {
+		["Content-Type"] = "text/html",
+	}
+	
+	response:writeHead("200", headers)
+	response:writeEnd(createBody());
+
+end
+
+-- /acebuilds
+Handlers.HandleAceBuildGET = function(request, response)
+	--Runtime.writeLine("HandleAceBuildGET - BEGIN")
+
+
+    local absolutePath = string.gsub(URL.unescape(request.Url.path), "%.%.", '%.');
+	local filename = './wwwroot'..absolutePath;
+
+	print("FILE: ", filename)
+
+	FileService.SendFile(filename, response)
 end
 
 --[[
-local getRecords = function(source, filterfunc)
-	local res = {}
-	for record in Query.query {
-		source = source,
-		filter = filterfunc,
-	} do
-		table.insert(res,record);
-	end
+        TotalPhysical = lpBuffer.ullTotalPhys;
+        AvailablePhysical = lpBuffer.ullAvailPhys;
 
-	return res;
+        TotalVirtual = lpBuffer.ullTotalVirtual;
+        AvailableVirtual = lpBuffer.ullAvailVirtual;
+
+        TotalPageFile = lpBuffer.ullAvailPageFile;
+        AvailablePageFile = lpBuffer.ullAvailablePageFile;
+        
+        AvailableExtendedVirtual = lpBuffer.ullAvailExtendedVirtual;
+--]]
+
+local memoryTemplate = [[
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Memory Configuration</title>
+	<style>
+		table
+		{
+			border-collapse:collapse;
+		}
+		table,th,td
+		{
+			border:1px solid black;
+		}
+	</style>
+  </head>
+  <body>
+    <table summary="Machine Memory Usage">
+  <TR>
+    <TH scope="col" abbr="name"></TH>
+    <TH scope="col" abbr="ID">Total</TH>
+    <TH scope="col" abbr="Session">Available</TH>
+  </TR>
+      	<tr><td>Memory Load<td><?MemoryLoad?>%</tr>
+    	<tr><td>Total Physical<td><?TotalPhysical?>MB<td><?AvailablePhysical?>MB</tr>
+    	<tr><td>Total Virtual<td><?TotalVirtual?>MB<td><?AvailableVirtual?>MB</tr>
+    	<tr><td>Total Page File<td><?TotalPageFile?>MB<td><?AvailablePageFile?>MB</tr>
+    </table>
+  </body>
+</html>
+]] 
+
+Handlers.HandleMemoryGET = function(request, response)
+	local meminfo, err = SysInfo.getMemoryStatus();
+
+print("HandleMemoryGET: ", meminfo, err)
+for k,v in pairs(meminfo) do
+	if k ~= "MemoryLoad" then
+		meminfo[k] = tonumber(v/1024/1024)
+	end
 end
 
-local Workstation = require("Workstation");
-local station = Workstation();
-
-	elseif urlparts.path == "/transports" then
-		local jsonstr = JSON.encode(getRecords(station:transports()), {indent=true});
-		
-		response:writeHead("200")
-		response:writeEnd(jsonstr);		
-	elseif urlparts.path == "/uses" then
-		local jsonstr = JSON.encode(getRecords(station:uses(1)), {indent=true});
-		
-		response:writeHead("200")
-		response:writeEnd(jsonstr);		
-	elseif urlparts.path == "/users" then
-		local jsonstr = JSON.encode(getRecords(station:users(1)), {indent=true});
-		
-		response:writeHead("200")
-		response:writeEnd(jsonstr);		
-	elseif urlparts.path == "/login" then
-		local auth = request:GetHeader("authorization");
-		if not auth then
-			local headers = {["WWW-Authenticate"] = 'Basic realm="redmond"'};
-			response:writeHead("401", headers);
-			response:writeEnd();
-		else
-			response:writeHead("200");
-			response:writeEnd(pages.login);
-		end
-	else
-		FileService.SendFile("."..urlparts.path, response);
+	if not meminfo then
+		response:writeHead(404);
+		response:writeEnd();
+		return false;
 	end
---]]
+
+	response:writeHead(200);
+	response:writeEnd(Html:fillTemplate(memoryTemplate, meminfo))
+end
 
 return Handlers;
