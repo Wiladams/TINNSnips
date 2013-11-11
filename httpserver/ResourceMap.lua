@@ -1,15 +1,15 @@
 
 local handlers = require("ResourceHandlers")
 
-
 local ResourceMap = {
 	["/"]		= {name="/",
-		GET 				= handlers.HandleFileGET,
+		GET 	= handlers.HandleFileGET,
 	};
 
-	["/protected.htm"] = {name="/protected.htm",
-		GET 		= handlers.HandleProtectedGET,
+	["/echo"] = {name="/echo",
+		GET 	= handlers.HandleEchoGET,
 	};
+
 }
 
 

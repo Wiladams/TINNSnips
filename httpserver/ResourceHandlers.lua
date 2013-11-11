@@ -1,8 +1,6 @@
 local URL = require("url");
 local FileService = require("FileService");
-local DigestAuthenticator = require("DigestAuthenticator") 
-
-local authenticator = DigestAuthenticator({Realm = "users@Contoso.com"})
+local MemoryStream = require("MemoryStream")
 
 local function replacedotdot(s)
     return string.gsub(s, "%.%.", '%.')
@@ -11,6 +9,10 @@ end
 local HandleFileGET = function(request, response)
     local absolutePath = replacedotdot(URL.unescape(request.Url.path));
 
+    if absolutePath == "/" then
+    	absolutePath = "/index.htm"
+    end
+
 	local filename = './wwwroot'..absolutePath;
 	
 	FileService.SendFile(filename, response)
@@ -18,34 +20,20 @@ local HandleFileGET = function(request, response)
 	return false;
 end
 
-local HandleProtectedGET = function(request, response)
-	-- look for the authorization header
-	local authorization = request:GetHeader("Authorization")
-	
-	-- If we don't see the authorization header, 
-	-- then send back a 401, with an authorization challenge
-	if not authorization then
-		authenticator:issueServerChallenge(request, response)
-		return false;
-	end
+local HandleEchoGET = function(request, response)
+	-- write the request into a memory buffer
+	local ms = MemoryStream(16*1024);
+	request:Send(ms)
 
--- There is an authorization header
--- so print out headers
-	print("REQUEST HEADERS")
-	for k,v in pairs(request.Headers) do
-		print(k,v)
-	end
-
-    local absolutePath = replacedotdot(URL.unescape(request.Url.path));
-
-	local filename = './wwwroot'..absolutePath;
-	
-	FileService.SendFile(filename, response)
-
+	-- write the memory buffer as a response
+	response:writeHead(200, {["Content-Type"] = "text/plain"})
+	response:writeEnd(ms:ToString())
 end
+
+
 
 
 return {
 	HandleFileGET = HandleFileGET,
-	HandleProtectedGET = HandleProtectedGET,
+	HandleEchoGET = HandleEchoGET,
 }
