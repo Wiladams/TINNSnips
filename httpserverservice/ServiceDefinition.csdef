@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceDefinition 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	name="httpserver" 
+	xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition">
+    
+    <WorkerRole name="FrontEnd" vmsize="Small" enableNativeCodeExecution="true">
+		<ConfigurationSettings>
+		</ConfigurationSettings>
+		<Endpoints>
+			<InputEndpoint name="FrontEnd" protocol="tcp" port="80" />
+		</Endpoints>
+
+		<Runtime executionContext="limited">
+			<EntryPoint>
+				<ProgramEntryPoint commandLine="tinn.exe main.lua 80" setReadyOnProcessStart="true"/>
+			</EntryPoint>
+		</Runtime>
+	</WorkerRole>
+</ServiceDefinition>

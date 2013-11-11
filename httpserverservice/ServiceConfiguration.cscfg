@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	serviceName="httpserver" 
+	osFamily="2" 
+	osVersion="*" 
+	xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration">
+
+	<Role name="FrontEnd">
+		<Instances count="1" />
+		<ConfigurationSettings />
+	</Role>
+</ServiceConfiguration>
