@@ -11,8 +11,8 @@ local SCManager = require("SCManager");
 local HandleFileSystem = require("HandleFileSystem")
 local FileService = require("FileService")
 local URL = require("url")
-local Html = require("Html")
-
+local HtmlTemplate = require("HtmlTemplate")
+local MemoryStream = require("MemoryStream")
 
 local Handlers = {}
 
@@ -41,6 +41,16 @@ Handlers.HandleDefaultGET = function(request, response)
 
 	response:writeHead("200")
 	response:writeEnd(pages.index);
+end
+
+Handlers.HandleEchoGET = function(request, response)
+	-- write the request into a memory buffer
+	local ms = MemoryStream(16*1024);
+	request:Send(ms)
+
+	-- write the memory buffer as a response
+	response:writeHead(200, {["Content-Type"] = "text/plain"})
+	response:writeEnd(ms:ToString())
 end
 
 -- favicon.ico
@@ -84,7 +94,7 @@ local getServiceData = function(request)
 	return getServices(filterfunc)
 end
 
-local servicesTemplate = [[
+local servicesTemplate = HtmlTemplate([[
 <html>
   <head><title>Services</title>
   	<style>
@@ -120,7 +130,7 @@ local servicesTemplate = [[
   </table>
 </body>
 </html>
-]]
+]])
 
 Handlers.HandleServicesGETData = function(request, response)
 	Runtime.writeLine("HandleServicesGETData - BEGIN")
@@ -156,7 +166,7 @@ State
 			table.insert(tbody, rowstr)
 		end
 
-		return Html:fillTemplate(servicesTemplate, {tablebody = table.concat(tbody)})
+		return servicesTemplate:fillTemplate({tablebody = table.concat(tbody)})
 	end
 
 
@@ -313,7 +323,7 @@ end
         AvailableExtendedVirtual = lpBuffer.ullAvailExtendedVirtual;
 --]]
 
-local memoryTemplate = [[
+local memoryTemplate = HtmlTemplate([[
 <!DOCTYPE html>
 <html>
   <head>
@@ -343,7 +353,7 @@ local memoryTemplate = [[
     </table>
   </body>
 </html>
-]] 
+]])
 
 Handlers.HandleMemoryGET = function(request, response)
 	local meminfo, err = SysInfo.getMemoryStatus();
@@ -362,7 +372,7 @@ end
 	end
 
 	response:writeHead(200);
-	response:writeEnd(Html:fillTemplate(memoryTemplate, meminfo))
+	response:writeEnd(memoryTemplate:fillTemplate(meminfo))
 end
 
 return Handlers;

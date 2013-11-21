@@ -21,6 +21,10 @@ local ResourceMap = {
 		GET 				= handlers.HandleAceBuildGET,
 	};
 
+	["/echo"] = {name="/echo",
+		GET 				= handlers.HandleEchoGET,
+	};
+
 	["/favicon.ico"]		= {name="/favicon.ico",
 		GET 				= handlers.HandleFaviconGET,
 	};

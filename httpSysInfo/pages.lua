@@ -3,13 +3,13 @@ local ffi = require("ffi")
 local SysInfo = require("SysInfo");
 local core_sysinfo = require("core_sysinfo_l1_2_0");
 local Network = require("Network")
-local Html = require("Html")
+local HtmlTemplate = require("HtmlTemplate")
 
 local osvinfo = SysInfo.OSVersionInfo();
 local osversion = string.format("Microsoft Windows [Version %s]", tostring(osvinfo));
 
 
-local indexPageTemplate = [[
+local indexPageTemplate = HtmlTemplate([[
 <html>
 	<head>
 		<title>System Information</title>
@@ -29,7 +29,7 @@ local indexPageTemplate = [[
 		</table>
 	</body>
 </html>
-]];
+]]);
 
 local indexSubs = {
 	hostname = Network:getHostName();
@@ -45,7 +45,7 @@ return {
 
 -- Construct the home (index) page
 	getIndexPage = function()
-		return Html:fillTemplate(indexPageTemplate, indexSubs)
+		return indexPageTemplate:fillTemplate(indexSubs)
 	end,
 
 	login = [[

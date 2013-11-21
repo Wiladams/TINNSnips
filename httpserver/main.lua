@@ -14,11 +14,40 @@
 	default port used is 8080
 ]]
 
-local WebApp = require("WebApp")
 local resourceMap = require("ResourceMap");
+local ResourceMapper = require("ResourceMapper");
+local HttpServer = require("HttpServer")
 
 
 local port = arg[1] or 8080
 
-local app = WebApp(resourceMap, port);
-app:run();
+local Mapper = ResourceMapper(resourceMap);
+local obj = {}
+
+
+
+local OnRequest = function(param, request, response)
+	local handler, err = Mapper:getHandler(request)
+
+	-- recycle the socket, unless the handler explictly says
+	-- it will do it, by returning 'true'
+	if handler then
+		if not handler(request, response) then
+			param.Server:HandleRequestFinished(request);
+		end
+	else
+		print("NO HANDLER: ", request.Url.path);
+		-- send back content not found
+		response:writeHead(404);
+		response:writeEnd();
+
+		-- recylce the request in case the socket
+		-- is still open
+		param.Server:HandleRequestFinished(request);
+	end
+
+end
+
+
+obj.Server = HttpServer(port, OnRequest, obj);
+obj.Server:run()
