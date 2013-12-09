@@ -1,10 +1,8 @@
 
-
-local ffi = require "ffi"
-
 local GameWindow = require "GameWindow"
-local GDI32 = require "GDI32"
 local StopWatch = require "StopWatch"
+
+local sw = StopWatch();
 
 -- The routine that gets called for any
 -- mouse activity messages
@@ -16,7 +14,6 @@ function keyboardinteraction(msg, wparam, lparam)
 	print(string.format("Keyboard: 0x%x", msg))
 end
 
-local sw = StopWatch();
 
 function randomColor()
 		local r = math.random(0,255)
@@ -34,11 +31,12 @@ function randomline(win)
 	local y2 = 40 + (math.random() * (win.Height - 40))
 
 	local color = randomColor()
+	local ctxt = win.GDIContext;
 
-	win.GDIContext:SetDCPenColor(color)
+	ctxt:SetDCPenColor(color)
 
-	win.GDIContext:MoveTo(x1, y1)
-	win.GDIContext:LineTo(x2, y2)
+	ctxt:MoveTo(x1, y1)
+	ctxt:LineTo(x2, y2)
 end
 
 function randomrect(win)
@@ -48,43 +46,38 @@ function randomrect(win)
 	local y = math.random(0, win.Height-1-height)
 	local right = x + width
 	local bottom = y + height
---print(x,y,width,height)
 	local brushColor = randomColor()
-	win.GDIContext:SetDCBrushColor(brushColor)
-	win.GDIContext:RoundRect(x, y, right, bottom, 0, 0)
+
+	local ctxt = win.GDIContext;
+
+	ctxt:SetDCBrushColor(brushColor)
+	--ctxt:RoundRect(x, y, right, bottom, 0, 0)
+	ctxt:Rectangle(x, y, right, bottom)
 end
 
 
 function ontick(win, tickCount)
-	local black = RGB(0,0,0)
-	win.GDIContext:SetDCPenColor(black)
 
-	for i=1,win.FrameRate do
+	for i=1,30 do
 		randomrect(win)
+		randomline(win)
 	end
-
-	--for i=1,win.FrameRate do
-	--	randomline(win)
-	--end
 
 	local stats = string.format("Seconds: %f  Frame: %d  FPS: %f", sw:Seconds(), tickCount, tickCount/sw:Seconds())
 	win.GDIContext:Text(stats)
 end
 
 
--- MouseInteractor = mouseinteraction,
 
----[[
 local appwin = GameWindow({
 		Title = "Game Window",
 		KeyboardInteractor = keyboardinteraction,
-		FrameRate = 30,
+		MouseInteractor = mouseinteraction,
+		FrameRate = 24,
 		OnTickDelegate = ontick,
 		Extent = {1024,768},
 		})
---]]
 
---local appwin = GameWindow({OnTickDelegate = ontick, Extent = {1024,768}, FrameRate=24.99})
 
-appwin:Run()
+appwin:run()
 

@@ -1,5 +1,6 @@
 
 local handlers = require("ResourceHandlers")
+local HandleFileSystem = require("HandleFileSystem")
 
 local ResourceMap = {
 	["/"]		= {name="/",
@@ -10,6 +11,13 @@ local ResourceMap = {
 		GET 	= handlers.HandleEchoGET,
 	};
 
+	["/log"] = {name="/log",
+		GET 	= handlers.HandleLogGET,
+	};
+	
+	["/files"] = {name="/files",
+		GET 	= HandleFileSystem.HandleFilesGET,
+	};
 }
 
 

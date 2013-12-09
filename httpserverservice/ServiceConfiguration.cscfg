@@ -8,7 +8,7 @@
 	xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration">
 
 	<Role name="FrontEnd">
-		<Instances count="1" />
+		<Instances count="2" />
 		<ConfigurationSettings />
 	</Role>
 </ServiceConfiguration>

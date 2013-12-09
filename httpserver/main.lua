@@ -22,12 +22,16 @@ local HttpServer = require("HttpServer")
 local port = arg[1] or 8080
 
 local Mapper = ResourceMapper(resourceMap);
-local obj = {}
+local Logfile = require("Logfile")
 
+local obj = {}
+--local logger = Logfile("requests.log")
 
 
 local OnRequest = function(param, request, response)
 	local handler, err = Mapper:getHandler(request)
+
+	--logger:writeString(string.format("Date: %s\t%s\t%s\r\n", os.date("%c"), request.Method, request.Resource));
 
 	-- recycle the socket, unless the handler explictly says
 	-- it will do it, by returning 'true'

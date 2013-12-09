@@ -30,10 +30,18 @@ local HandleEchoGET = function(request, response)
 	response:writeEnd(ms:ToString())
 end
 
+local HandleLogGET = function(request, response)
+	-- read the logfile into memory
+	local fs = io.open("requests.log")
+	local logdata = fs:read("*all");
+	fs:close();
 
-
+	response:writeHead(200, {["Content-Type"] = "text/plain"})
+	response:writeEnd(logdata)
+end
 
 return {
-	HandleFileGET = HandleFileGET,
 	HandleEchoGET = HandleEchoGET,
+	HandleFileGET = HandleFileGET,
+	HandleLogGET = HandleLogGET,
 }

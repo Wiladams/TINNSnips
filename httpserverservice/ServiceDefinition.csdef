@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ServiceDefinition 
-	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	name="httpserver" 
-	xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition">
+	xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" name="httpserver">
     
     <WorkerRole name="FrontEnd" vmsize="Small" enableNativeCodeExecution="true">
 		<ConfigurationSettings>
@@ -11,6 +8,10 @@
 		<Endpoints>
 			<InputEndpoint name="FrontEnd" protocol="tcp" port="80" />
 		</Endpoints>
+
+		<LocalResources>
+			<LocalStorage name="diagnostics" sizeInMB="10" />
+		</LocalResources>
 
 		<Runtime executionContext="limited">
 			<EntryPoint>
