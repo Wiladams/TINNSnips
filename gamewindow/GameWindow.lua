@@ -113,6 +113,7 @@ GameWindow.init = function(self, nativewindow, params)
 		MessageDelegate = params.MessageDelegate;
 		OnSetFocusDelegate = params.OnSetFocusDelegate;
 		OnTickDelegate = params.OnTickDelegate;
+		OnQuitDelegate = params.OnQuitDelegate;
 
 		KeyboardInteractor = params.KeyboardInteractor;
 		MouseInteractor = params.MouseInteractor;
@@ -205,6 +206,13 @@ end
 function GameWindow:OnQuit()
 print("GameWindow:OnQuit")
 	self.IsRunning = false
+
+	if self.OnQuitDelegate then
+		self.OnQuitDelegate(self)
+	end
+	-- return true, indicating it is ok to
+	-- continue to quit.
+	return true;
 end
 
 GameWindow.handleFrameTick = function(self)
@@ -212,6 +220,7 @@ GameWindow.handleFrameTick = function(self)
 
 	local closure = function(timer)
 		tickCount = tickCount + 1;
+
 		if (self.OnTickDelegate) then
 			self.OnTickDelegate(self, tickCount)
 		end
@@ -267,7 +276,9 @@ local appClose = function(win)
 
 		ffi.fill(msg, ffi.sizeof("MSG"))
 		local peeked = User32.PeekMessageA(msg, nil, 0, 0, User32.PM_REMOVE);
-			
+
+--print("PEEKED: ", peeked)
+
 		if peeked ~= 0 then
 
 			local res = User32.TranslateMessage(msg)
@@ -275,19 +286,27 @@ local appClose = function(win)
 			User32.DispatchMessageA(msg)
 
 			if msg.message == User32.WM_QUIT then
-				return win:OnQuit()
+				print("APP QUIT == TRUE")
+				win:OnQuit()
 			end
 		end
 
-		if not win.IsRunning then
+		if win.IsRunning == false then
+			print("APP CLOSE, IsRunning == false")		
+			if win.FrameTimer then
+				win.FrameTimer:cancel();
+			end
+
 			return true;
 		end
+
+		return false;
 	end
 
 	return closure;
 end
 
-local runWindow = function(self)
+GameWindow.runWindow = function(self)
 	
 	self:show()
 	self:update()
@@ -297,11 +316,10 @@ local runWindow = function(self)
 	self.FrameTimer = Timer({Delay=period, Period=period, OnTime =self:handleFrameTick()})
 
 	-- wait here until the application window is closed
-	waitFor(appClose(self))
-
-	-- cancel the frame timer
-	-- or strange things will happen
-	self.FrameTimer:cancel();
+	local res = waitFor(appClose(self))
+	print("RESULT, waitFor(appClose): ", res)
+	
+	print("GameWindow.runWindow == APP CLOSED PREDICATE ")
 end
 
 GameWindow.run = function(self)
@@ -310,15 +328,18 @@ GameWindow.run = function(self)
 		return
 	end
 
-	-- spawn the thread that will wait
-	-- for messages to finish
-	Task:spawn(runWindow, self);
-
 	-- set quanta to 0 so we don't waste time
 	-- in i/o processing if there's nothing there
 	Task:setMessageQuanta(0);
 	
+
+	-- spawn the thread that will wait
+	-- for messages to finish
+	Task:spawn(GameWindow.runWindow, self);
+
 	Task:start()
+
+	print("EXIT GameWindow.run")
 end
 
 
