@@ -96,6 +96,7 @@ local winKind = WindowKind:create("GameWindow", WindowProc);
 
 
 GameWindow.init = function(self, nativewindow, params)
+
 	local obj = {
 		NativeWindow = nativewindow,
 
@@ -105,9 +106,6 @@ GameWindow.init = function(self, nativewindow, params)
 		IsReady = false;
 		IsValid = false;
 		IsRunning = false;
-
-		FrameRate = params.FrameRate;
-		Interval =1/ params.FrameRate;
 
 		-- Interactor routines
 		MessageDelegate = params.MessageDelegate;
@@ -121,6 +119,7 @@ GameWindow.init = function(self, nativewindow, params)
 	}
 	setmetatable(obj, GameWindow_mt);
 	
+	obj:SetFrameRate(params.FrameRate)
 	obj:OnCreated(nativewindow);
 	
 	return obj;
@@ -136,13 +135,29 @@ GameWindow.create = function(self, params)
 	params.FrameRate = params.FrameRate or GameWindow.Defaults.FrameRate
 
 	-- try to create a window of our kind
-	local win, err = winKind:createWindow(params.Extent[1], params.Extent[2]);
+	local win, err = winKind:createWindow(params.Extent[1], params.Extent[2], params.Title);
 	
 	if not win then
 		return nil, err;
 	end
 	
 	return self:init(win, params);
+end
+
+GameWindow.getBackBuffer = function(self)
+	if not self.BackBuffer then
+		-- get the GDIcontext for the native window
+		local err
+		local bbfr, err = self.GDIContext:createCompatibleBitmap(self.Width, self.Height)
+
+		if not bbfr then
+			return nil, err;
+		end
+
+		self.BackBuffer = bbfr;
+	end
+
+	return self.BackBuffer;
 end
 
 function GameWindow:GetClientSize()
@@ -186,11 +201,13 @@ print("GameWindow:OnCreated: ", nativewindow)
 
 	GameWindow.WindowMap[winnum] = self
 
-	self.GDIContext = DeviceContext(User32.GetDC(nativewindow:getNativeHandle()));
+	self.GDIContext = DeviceContext:init(User32.GetDC(nativewindow:getNativeHandle()));
 
-print("GDIContext: ", self.GDIContext, self.GDIContext.Handle);
+
 	self.GDIContext:UseDCPen()
 	self.GDIContext:UseDCBrush()
+
+--print("GDIContext: ", self.GDIContext);
 
 	self.IsValid = true
 end

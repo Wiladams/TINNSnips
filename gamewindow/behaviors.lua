@@ -28,7 +28,7 @@ end
 
 local lines = function(constraint)
 	
-	-- draw a single random ellipse
+	-- draw a single random line
 	function randomline(ctxt, constraint, millis)
 		local x1 = constraint.Left + random() * constraint.Width
 		local y1 = constraint.Top + random() * constraint.Height
@@ -44,7 +44,7 @@ local lines = function(constraint)
 	end
 
 	local closure = function(ctxt, millis)
-		for i=1,30 do
+		for i=1,1 do
 			randomline(ctxt, constraint, millis)
 		end
 	end
@@ -78,14 +78,14 @@ local rectangles = function(constraint)
 		local y = random(constraint.Top, constraint.Top+constraint.Height-height)
 		local right = x + width
 		local bottom = y + height
-		local brushColor = animation.randomColor(0, millis % 255)
+		local brushColor = animation.randomColor()
 
 		ctxt:SetDCBrushColor(brushColor)
 		ctxt:Rectangle(x, y, right, bottom)
 	end
 
 	local closure = function(ctxt, millis)
-		for i=1,30 do
+		for i=1,1 do
 			randomrectangle(ctxt, constraint, millis)
 		end
 	end

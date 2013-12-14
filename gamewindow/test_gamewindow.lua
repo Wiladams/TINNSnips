@@ -51,18 +51,27 @@ local win = GameWindow({
 		Title = "Game Window",
 		KeyboardInteractor = keyboardinteraction,
 		MouseInteractor = mouseinteraction,
-		FrameRate = 40,
+		FrameRate = 1000,
 		OnTickDelegate = ontick,
 		OnQuitDelegate = onquit,
 		Extent = {1024,768},
 		})
 
+local loadFullscreen = function()
+	--animites.liner = Animite(win.GDIContext, Behaviors.lines({Left=0, Top=20, Width=win.Width, Height=(win.Height-1)-20}))
+	animites.rectangler = Animite(win.GDIContext, Behaviors.rectangles({Left=0, Top=20, Width=win.Width, Height=(win.Height-1)-20}))
+end
 
-animites.liner = Animite(win.GDIContext, 
-	Behaviors.lines({Left=win.Width/2, Top=20, Width=(win.Width-1)/2, Height=((win.Height-1)/2)-20}))
+local loadQuadScreen = function()
+animites.liner = Animite(win.GDIContext, Behaviors.lines({Left=win.Width/2, Top=20, Width=(win.Width-1)/2, Height=((win.Height-1)/2)-20}))
 animites.ellipser = Animite(win.GDIContext, Behaviors.ellipses({Left=win.Width/2, Top=win.Height/2, Width=(win.Width-1)/2, Height=((win.Height-1)/2)}))
 animites.rectangler = Animite(win.GDIContext, Behaviors.rectangles({Left =0,Top=20,Width=(win.Width-1)/2, Height=((win.Height-1)/2)-20}))
 --animites.pixler = Animite(win.GDIContext, Behaviors.pixels({Left=0, Top=win.Height/2, Width=(win.Width-1)/2, Height=((win.Height-1)/2)}))
+end
+
+
+--loadFullscreen();
+loadQuadScreen();
 
 -- get the mites running
 for name, mite in pairs(animites) do
