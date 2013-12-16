@@ -1,7 +1,8 @@
 
-local GDI32 = require("GDI32")
+local GDI = require("GDI32")
 
 local rand = math.random
+local RGB = GDI.RGB;
 
 function randomColor(low, high)
 	low = low or 0

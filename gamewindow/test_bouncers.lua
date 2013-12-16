@@ -11,7 +11,7 @@ local floor = math.floor
 local ceil = math.ceil
 local abs = math.abs
 local deg, rad = math.deg, math.rad
-
+local RGB = GDI32.RGB;
 local sw = Stopwatch();
 
 local animites = {}
