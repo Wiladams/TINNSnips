@@ -1,5 +1,5 @@
 
-local GameWindow = require "GameWindow"
+local GDIApp = require "GDIApp"
 local StopWatch = require "StopWatch"
 local Task = require("IOProcessor")
 local Animite = require("animite")
@@ -47,7 +47,7 @@ function onquit(win)
 end
 
 
-local win = GameWindow({
+local win = GDIApp({
 		Title = "Game Window",
 		KeyboardInteractor = keyboardinteraction,
 		MouseInteractor = mouseinteraction,

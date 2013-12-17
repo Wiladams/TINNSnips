@@ -1,5 +1,5 @@
 
-local GameWindow = require "GameWindow"
+local GDIApp = require "GDIApp"
 local Stopwatch = require "StopWatch"
 local Task = require("IOProcessor")
 local Animite = require("animite")
@@ -64,7 +64,6 @@ function ontick(win, tickCount)
 	local nYSrc = 0;
 
 	winctxt:BitBlt(nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop)
-
 end
 
 
@@ -76,7 +75,7 @@ function onquit(win)
 end
 
 
-local win = GameWindow({
+local win = GDIApp({
 		Title = "Bouncers",
 		--KeyboardInteractor = keyboardinteraction,
 		--MouseInteractor = mouseinteraction,
