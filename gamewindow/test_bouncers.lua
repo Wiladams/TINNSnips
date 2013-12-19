@@ -16,6 +16,10 @@ local sw = Stopwatch();
 
 local animites = {}
 
+local bbfr = nil
+local ctxt = nil
+local winctxt = nil
+
 -- The routine that gets called for any
 -- mouse activity messages
 function mouseinteraction(msg, wparam, lparam)
@@ -26,19 +30,26 @@ function keyboardinteraction(msg, wparam, lparam)
 	print(string.format("Keyboard: 0x%x", msg))
 end
 
+function oncreated(win)
+	winctxt = win.GDIContext
+
+	bbfr = win:getBackBuffer()
+	ctxt, err = bbfr:getDeviceContext();
+
+	-- Make sure we're using DC Brush and pen to start
+	ctxt:UseDCBrush(true);
+	ctxt:UseDCPen(true);
+end
+
+function onquit(win)
+	print("ON QUIT!")
+	
+	return true;
+end
 
 function ontick(win, tickCount)
 --print("ONTICK")
 	
-	local winctxt = win.GDIContext
-	--local winctxt = DeviceContext();
-
-	local bbfr = win:getBackBuffer()
-	local ctxt, err = bbfr:getDeviceContext();
-
-	-- fill screen with white
-	ctxt:UseDCBrush(true);
-	ctxt:UseDCPen(true);
 	local sangle = ceil(abs(sin(rad(tickCount % 360)))*255)
 	--print(sangle)
 	ctxt:SetDCBrushColor(RGB(sangle,sangle,sangle))
@@ -68,11 +79,7 @@ end
 
 
 
-function onquit(win)
-	print("ON QUIT!")
-	
-	return true;
-end
+
 
 
 local win = GDIApp({
@@ -80,10 +87,12 @@ local win = GDIApp({
 		--KeyboardInteractor = keyboardinteraction,
 		--MouseInteractor = mouseinteraction,
 		FrameRate = 60,
+		OnCreatedDelegate = oncreated,
 		OnTickDelegate = ontick,
 		OnQuitDelegate = onquit,
 		Extent = {1024,768},
 		})
+
 
 
 -- create some bouncers
