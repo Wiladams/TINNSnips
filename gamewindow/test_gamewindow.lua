@@ -12,7 +12,7 @@ local sw = StopWatch();
 -- The routine that gets called for any
 -- mouse activity messages
 function mouseinteraction(msg, wparam, lparam)
-	--print(string.format("Mouse: 0x%x", msg))
+	print(string.format("Mouse: 0x%x", msg))
 end
 
 function keyboardinteraction(msg, wparam, lparam)
@@ -57,6 +57,7 @@ local win = GDIApp({
 		Extent = {1024,768},
 		})
 
+
 local loadFullscreen = function()
 	--animites.liner = Animite(win.GDIContext, Behaviors.lines({Left=0, Top=20, Width=win.Width, Height=(win.Height-1)-20}))
 	animites.rectangler = Animite(win.GDIContext, Behaviors.rectangles({Left=0, Top=20, Width=win.Width, Height=(win.Height-1)-20}))
@@ -78,6 +79,7 @@ for name, mite in pairs(animites) do
 	mite:start();
 end
 
+print("Animites started")
 
 win:run()
 
