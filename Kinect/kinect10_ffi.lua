@@ -106,7 +106,7 @@ typedef struct INuiFrameTexture INuiFrameTexture;
 
     typedef struct INuiFrameTexture
     {
-        struct INuiFrameTextureVtbl *lpVtbl;
+        const struct INuiFrameTextureVtbl *lpVtbl;
     } INuiFrameTexture;
 
 ]]
@@ -306,12 +306,11 @@ ffi.cdef[[
             /* [in] */ LARGE_INTEGER liTimeStamp,
             /* [retval][out] */ INuiDepthFilter **ppDepthFilter);
         
-        END_INTERFACE
     } INuiSensorVtbl;
 
     interface INuiSensor
     {
-        CONST_VTBL struct INuiSensorVtbl *lpVtbl;
+        const struct INuiSensorVtbl *lpVtbl;
     };
 ]]
 --]==]
@@ -333,7 +332,7 @@ ffi.cdef[[
   HRESULT NuiCreateCoordinateMapperFromParameters(
                 ULONG dataByteCount, 
                 void* pData,
-                _Out_ INuiCoordinateMapper **ppCoordinateMapper);
+                INuiCoordinateMapper **ppCoordinateMapper);
 */
 
   //NuiCreateDepthFilter = NuiLib.NuiCreateDepthFilter,
