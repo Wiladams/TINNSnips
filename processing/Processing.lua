@@ -9,35 +9,8 @@ local GDIApp = require("GDIApp")
 local RendererGdi = require("RendererGdi")
 local Language = require("ProcessingLanguage")
 
---[[
-require "maths"
-require "glsl"	-- for 'mod'
-require "Color"
-require "Point3D"
-require "Vector3D"
-
-
-require "GUIStyle"
-require "KeyboardActivityArgs"
-require "MouseActivityArgs"
-require "OrthoCamera"
-require "Texture"
-
-require "PImage"
-
--- Objects used in UI
-require "Layout"
-require "GBracket"
-require "GFont"
-require "GRoundedRectangle"
-require "GText"
-require "param_superellipse"
-require "Rectangle"
-require "ShapeBuilder"
---]]
 
 -- Constants for Processing Environment
-
 HALF_PI = math.pi / 2
 PI = math.pi
 QUARTER_PI = math.pi/4
@@ -49,14 +22,14 @@ HSB = 2
 
 
 -- for beginShape()
-POINTS = 1; -- gl.POINTS
-LINES = 2; -- gl.LINES
-TRIANGLES = 3; -- gl.TRIANGLES
-TRIANGLE_STRIP = 4; -- gl.TRIANGLE_STRIP
-TRIANGLE_FAN = 5; -- gl.TRIANGLE_FAN
-QUADS = 6; -- gl.QUADS
-QUAD_STRIP = 7; --gl.QUAD_STRIP
-
+POINTS 			= 0x0000; -- GL_POINTS
+LINES 			= 0x0001; -- GL_LINES
+TRIANGLES 		= 0x0004; -- GL_TRIANGLES
+TRIANGLE_STRIP 	= 0x0005; -- GL_TRIANGLE_STRIP
+TRIANGLE_FAN 	= 0x0006; -- GL_TRIANGLE_FAN
+QUADS 			= 0x0007; -- GL_QUADS
+QUAD_STRIP 		= 0x0008; -- GL_QUAD_STRIP
+POLYGON 		= 0x0009; -- GL_POLYGON
 CLOSE = 1;
 
 LEFT = 1;
