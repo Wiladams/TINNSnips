@@ -1,7 +1,6 @@
 
 local GDIApp = require "GDIApp"
 local Stopwatch = require "StopWatch"
-local Task = require("IOProcessor")
 local Animite = require("animite")
 local bouncers = require("bouncers")
 local GDI32 = require("GDI32")
@@ -92,6 +91,6 @@ for i=1,5000 do
 end
 
 
-Task:setMessageQuanta(0)
+--Task:setMessageQuanta(0)
 win:run()
 
