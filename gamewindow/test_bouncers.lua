@@ -1,9 +1,10 @@
 
-local GDIApp = require "GDIApp"
+local GDIWindow = require "GDIWindow"
 local Stopwatch = require "StopWatch"
 local Animite = require("animite")
 local bouncers = require("bouncers")
 local GDI32 = require("GDI32")
+local Functor = require("Functor")
 
 local sin = math.sin
 local floor = math.floor
@@ -25,15 +26,16 @@ function keyboardinteraction(msg, wparam, lparam)
 	print(string.format("Keyboard: 0x%x", msg))
 end
 
-
-function ontick(win, tickCount)
+local tickCount = 0;
+function ontick(win)
+	tickCount = tickCount + 1;
 --print("ONTICK")
 	
 	local winctxt = win.GDIContext
-	--local winctxt = DeviceContext();
 
 	local bbfr = win:getBackBuffer()
 	local ctxt, err = bbfr:getDeviceContext();
+	--local ctxt = winctxt;
 
 	-- fill screen with white
 	ctxt:UseDCBrush(true);
@@ -74,11 +76,10 @@ function onquit(win)
 end
 
 
-local win = GDIApp({
+local win = GDIWindow({
 		Title = "Bouncers",
 		--KeyboardInteractor = keyboardinteraction,
 		--MouseInteractor = mouseinteraction,
-		FrameRate = 60,
 		OnTickDelegate = ontick,
 		OnQuitDelegate = onquit,
 		Extent = {1024,768},
@@ -92,5 +93,6 @@ end
 
 
 --Task:setMessageQuanta(0)
+periodic(Functor(ontick,win), 1000/15)
 win:run()
 
