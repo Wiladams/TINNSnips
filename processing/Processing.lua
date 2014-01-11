@@ -4,11 +4,11 @@
 	From the Processing Reference: http://processing.org/reference/
 --]]
 
-local Task = require("IOProcessor")
-local GDIApp = require("GDIApp")
+--local Application = require("Application")
+local GDIWindow = require("GDIWindow")
 local RendererGdi = require("RendererGdi")
 local Language = require("ProcessingLanguage")
-
+local Functor = require("Functor")
 
 -- Constants for Processing Environment
 HALF_PI = math.pi / 2
@@ -371,11 +371,12 @@ function Processing.MouseUp(self, but, x, y, status)
 end
 
 function Processing.MouseWheel(delta, x, y, status)
+	print(string.format("mousewheel: %d", delta))
 end
 
 
 -- create an application window
-local win = GDIApp({
+local win = GDIWindow({
 		Title = "Processing",
 		--KeyboardInteractor = keyboardinteraction,
 		MouseInteractor = MouseActivity,
@@ -390,6 +391,7 @@ Processing.Renderer = RendererGdi(win.GDIContext)
 
 -- The begin() function is used to get things running
 begin = function()
+	periodic(Functor(OnTick,win), 1000/30)
 	win:run()
 end
 

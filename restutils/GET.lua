@@ -1,6 +1,6 @@
 -- http://kfm.verens.com/demo/trunk/index.php?lang=en
 
-local IOProcessor = require("IOProcessor")
+local Application = require("Application")
 local REST = require("http_rest");
 
 local main = function()

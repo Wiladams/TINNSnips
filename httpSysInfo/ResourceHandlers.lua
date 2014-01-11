@@ -181,6 +181,7 @@ end
 
 -- /processes
 local getProcessData = function(request)
+print("getProcessData, 1.0")
 	local filterfunc;
 
 	if request.Url.query then
@@ -191,43 +192,50 @@ local getProcessData = function(request)
 		end
 	end
 
-	local getProcesses = function(filterfunc)
-		local res = {};
-	
-		for record in Query.query {
-			source = OSProcess:processes(), 
+print("getProcessData, 2.0")
 
-			filter = filterfunc,
-			} do
-			table.insert(res, record);
-		end
+	local res = {};
+print("getProcessData, 3.0")
+		
+	for record in Query.query {
+		source = OSProcess:processes(), 
 
-		return res;
+		filter = filterfunc,
+		} do
+print("insert record: ", record)
+		table.insert(res, record);
 	end
+		
+	print("getProcessData, 4.0")
 
-	return getProcesses(filterfunc);
+	return res;
 end
 
 
 Handlers.HandleProcessesGETData = function(request, response)
-	Runtime.writeLine("HandleProcessesGETData - BEGIN")
-
+	--Runtime.writeLine("HandleProcessesGETData - BEGIN")
+print("HandleProcessesGETData, 1.0")
 	local body = JSON.encode(getProcessData(request), {indent=true});
 
+print("HandleProcessesGETData, 2.0")
 	local headers = {
 		["Content-Type"] = "application/json",
 	}
 	
+print("HandleProcessesGETData, 3.0")
 	response:writeHead("200", headers)
+print("HandleProcessesGETData, 4.0")
 	response:writeEnd(body);
+print("HandleProcessesGETData, 5.0")
 
 end
 
 
 
 Handlers.HandleProcessesGET = function(request, response)
-	Runtime.writeLine("HandleProcessesGET - BEGIN")
-	
+	--Runtime.writeLine("HandleProcessesGET - BEGIN")
+	print("Handlers.HandleProcessesGET")
+
 	local data = getProcessData(request)
 
 --[[
@@ -293,7 +301,11 @@ table.insert(body,
 	}
 	
 	response:writeHead("200", headers)
-	response:writeEnd(createBody());
+	local body = createBody();
+	print("HandleProcessesGET, BODY")
+	print(body)
+
+	response:writeEnd(body);
 
 end
 

@@ -1,6 +1,6 @@
 local FileStream = require("FileStream")
 
-local logFile = FileStream("logfile.txt")
+--local logFile = FileStream("logfile.txt")
 
 local Runtime = {}
 

@@ -93,6 +93,6 @@ end
 
 
 --Task:setMessageQuanta(0)
-periodic(Functor(ontick,win), 1000/15)
+periodic(Functor(ontick,win), 1000/30)
 win:run()
 
