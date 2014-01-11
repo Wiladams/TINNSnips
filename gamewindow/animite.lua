@@ -1,6 +1,6 @@
 
 local Stopwatch = require("StopWatch")
-
+local Functor = require("Functor")
 
 --[[
 	Animated Sprite
@@ -33,7 +33,6 @@ Animite.create = function(self, ctxt, handler)
 end
 
 Animite.loop = function(self)
---print("Animite.loop - BEGIN")
 	while self.IsRunning do
 		self.Handler(self.Context, self.Clock:Milliseconds())
 
