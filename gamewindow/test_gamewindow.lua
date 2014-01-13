@@ -1,7 +1,6 @@
 
-local GDIApp = require "GDIApp"
+local GDIWindow = require "GDIWindow"
 local StopWatch = require "StopWatch"
-local Task = require("IOProcessor")
 local Animite = require("animite")
 local Behaviors = require("behaviors")
 
@@ -12,7 +11,7 @@ local sw = StopWatch();
 -- The routine that gets called for any
 -- mouse activity messages
 function mouseinteraction(msg, wparam, lparam)
-	--print(string.format("Mouse: 0x%x", msg))
+	print(string.format("Mouse: 0x%x", msg))
 end
 
 function keyboardinteraction(msg, wparam, lparam)
@@ -47,7 +46,7 @@ function onquit(win)
 end
 
 
-local win = GDIApp({
+local win = GDIWindow({
 		Title = "Game Window",
 		KeyboardInteractor = keyboardinteraction,
 		MouseInteractor = mouseinteraction,
@@ -56,6 +55,7 @@ local win = GDIApp({
 		OnQuitDelegate = onquit,
 		Extent = {1024,768},
 		})
+
 
 local loadFullscreen = function()
 	--animites.liner = Animite(win.GDIContext, Behaviors.lines({Left=0, Top=20, Width=win.Width, Height=(win.Height-1)-20}))
@@ -78,6 +78,7 @@ for name, mite in pairs(animites) do
 	mite:start();
 end
 
+print("Animites started")
 
 win:run()
 

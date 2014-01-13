@@ -1,10 +1,10 @@
 
-local GDIApp = require "GDIApp"
+local GDIWindow = require "GDIWindow"
 local Stopwatch = require "StopWatch"
-local Task = require("IOProcessor")
 local Animite = require("animite")
 local bouncers = require("bouncers")
 local GDI32 = require("GDI32")
+local Functor = require("Functor")
 
 local sin = math.sin
 local floor = math.floor
@@ -16,6 +16,7 @@ local sw = Stopwatch();
 
 local animites = {}
 
+
 -- The routine that gets called for any
 -- mouse activity messages
 function mouseinteraction(msg, wparam, lparam)
@@ -26,19 +27,26 @@ function keyboardinteraction(msg, wparam, lparam)
 	print(string.format("Keyboard: 0x%x", msg))
 end
 
+function oncreated(win)
+	print("Window Created")
+end
 
-function ontick(win, tickCount)
+local tickCount = 0;
+
+function ontick(win)
+	tickCount = tickCount + 1;
 --print("ONTICK")
 	
 	local winctxt = win.GDIContext
-	--local winctxt = DeviceContext();
 
 	local bbfr = win:getBackBuffer()
 	local ctxt, err = bbfr:getDeviceContext();
+	--local ctxt = winctxt;
 
-	-- fill screen with white
+	-- Make sure we're using DC Brush and pen to start
 	ctxt:UseDCBrush(true);
 	ctxt:UseDCPen(true);
+	
 	local sangle = ceil(abs(sin(rad(tickCount % 360)))*255)
 	--print(sangle)
 	ctxt:SetDCBrushColor(RGB(sangle,sangle,sangle))
@@ -67,7 +75,6 @@ function ontick(win, tickCount)
 end
 
 
-
 function onquit(win)
 	print("ON QUIT!")
 	
@@ -75,15 +82,17 @@ function onquit(win)
 end
 
 
-local win = GDIApp({
+
+
+local win = GDIWindow({
 		Title = "Bouncers",
 		--KeyboardInteractor = keyboardinteraction,
 		--MouseInteractor = mouseinteraction,
-		FrameRate = 60,
 		OnTickDelegate = ontick,
 		OnQuitDelegate = onquit,
 		Extent = {1024,768},
 		})
+
 
 
 -- create some bouncers
@@ -92,6 +101,7 @@ for i=1,5000 do
 end
 
 
-Task:setMessageQuanta(0)
+--Task:setMessageQuanta(0)
+periodic(Functor(ontick,win), 1000/30)
 win:run()
 

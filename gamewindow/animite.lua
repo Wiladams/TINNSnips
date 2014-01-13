@@ -1,7 +1,6 @@
 
-local Task = require("IOProcessor")
 local Stopwatch = require("StopWatch")
-
+local Functor = require("Functor")
 
 --[[
 	Animated Sprite
@@ -34,18 +33,17 @@ Animite.create = function(self, ctxt, handler)
 end
 
 Animite.loop = function(self)
---print("Animite.loop - BEGIN")
 	while self.IsRunning do
 		self.Handler(self.Context, self.Clock:Milliseconds())
 
-		Task:yield();
+		yield();
 	end
 end
 
 Animite.start = function(self)
 	self.IsRunning = true;
 
-	Task:spawn(Animite.loop, self)
+	spawn(Animite.loop, self)
 end
 
 Animite.stop = function(self)

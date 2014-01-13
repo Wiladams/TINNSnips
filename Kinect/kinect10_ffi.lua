@@ -9,6 +9,35 @@ local WTypes = require("WTypes")
 
 local NuiLib = ffi.load("kinect10")
 
+
+ffi.cdef[[
+static const int  NUI_INITIALIZE_FLAG_USES_AUDIO                =  0x10000000;
+static const int  NUI_INITIALIZE_FLAG_USES_DEPTH_AND_PLAYER_INDEX =0x00000001;
+static const int  NUI_INITIALIZE_FLAG_USES_COLOR                  =0x00000002;
+static const int  NUI_INITIALIZE_FLAG_USES_SKELETON               =0x00000008;  
+static const int  NUI_INITIALIZE_FLAG_USES_DEPTH                  =0x00000020;
+static const int  NUI_INITIALIZE_FLAG_USES_HIGH_QUALITY_COLOR     =0x00000040;  // implies COLOR stream will be from uncompressed YUY2 @ 15fps
+
+static const int  NUI_INITIALIZE_DEFAULT_HARDWARE_THREAD          =0xFFFFFFFF;
+]]
+
+
+ffi.cdef[[
+HRESULT NuiInitialize(DWORD dwFlags);
+void NuiShutdown();
+]]
+
+
+
+
+
+
+ffi.cdef[[
+typedef struct INuiCoordinateMapper INuiCoordinateMapper;
+typedef struct INuiColorCameraSettings INuiColorCameraSettings;
+typedef struct INuiDepthFilter INuiDepthFilter;
+]]
+
 ffi.cdef[[
 typedef enum _NUI_IMAGE_TYPE
 {
@@ -70,7 +99,7 @@ typedef struct INuiFrameTexture INuiFrameTexture;
         
         HRESULT ( __stdcall *QueryInterface )( 
             INuiFrameTexture * This,
-            /* [in] */ REFIID riid,
+            REFIID riid,
             /* [annotation][iid_is][out] */ 
              void **ppvObject);
         
@@ -100,13 +129,13 @@ typedef struct INuiFrameTexture INuiFrameTexture;
         
         HRESULT ( __stdcall *UnlockRect )( 
             INuiFrameTexture * This,
-            /* [in] */ UINT Level);
+            UINT Level);
         
     } INuiFrameTextureVtbl;
 
     typedef struct INuiFrameTexture
     {
-        struct INuiFrameTextureVtbl *lpVtbl;
+        const struct INuiFrameTextureVtbl *lpVtbl;
     } INuiFrameTexture;
 
 ]]
@@ -122,270 +151,6 @@ typedef struct _NUI_IMAGE_FRAME
   DWORD                     dwFrameFlags;  
   NUI_IMAGE_VIEW_AREA       ViewArea;
 } NUI_IMAGE_FRAME;
-]]
-
---[==[
-ffi.cdef[[
-    typedef struct INuiSensor INuiSensor;
-
-    typedef struct INuiSensorVtbl
-    {
-        
-        HRESULT ( __stdcall *QueryInterface )( 
-            INuiSensor * This,
-            /* [in] */ REFIID riid,
-            /* [annotation][iid_is][out] */ 
-             void **ppvObject);
-        
-        ULONG ( __stdcall *AddRef )( 
-            INuiSensor * This);
-        
-        ULONG ( __stdcall *Release )( 
-            INuiSensor * This);
-        
-        HRESULT ( __stdcall *NuiInitialize )( 
-            INuiSensor * This,
-            /* [in] */ DWORD dwFlags);
-        
-        void ( __stdcall *NuiShutdown )( 
-            INuiSensor * This);
-        
-        HRESULT ( __stdcall *NuiSetFrameEndEvent )( 
-            INuiSensor * This,
-            /* [in] */ HANDLE hEvent,
-            /* [in] */ DWORD dwFrameEventFlag);
-        
-        HRESULT ( __stdcall *NuiImageStreamOpen )( 
-            INuiSensor * This,
-            /* [in] */ NUI_IMAGE_TYPE eImageType,
-            /* [in] */ NUI_IMAGE_RESOLUTION eResolution,
-            /* [in] */ DWORD dwImageFrameFlags,
-            /* [in] */ DWORD dwFrameLimit,
-            /* [in] */ HANDLE hNextFrameEvent,
-            /* [out] */ HANDLE *phStreamHandle);
-        
-        HRESULT ( __stdcall *NuiImageStreamSetImageFrameFlags )( 
-            INuiSensor * This,
-            /* [in] */ HANDLE hStream,
-            /* [in] */ DWORD dwImageFrameFlags);
-        
-        HRESULT ( __stdcall *NuiImageStreamGetImageFrameFlags )( 
-            INuiSensor * This,
-            /* [in] */ HANDLE hStream,
-            /* [retval][out] */ DWORD *pdwImageFrameFlags);
-        
-        HRESULT ( __stdcall *NuiImageStreamGetNextFrame )( 
-            INuiSensor * This,
-            /* [in] */ HANDLE hStream,
-            /* [in] */ DWORD dwMillisecondsToWait,
-            /* [retval][out] */ NUI_IMAGE_FRAME *pImageFrame);
-        
-        HRESULT ( __stdcall *NuiImageStreamReleaseFrame )( 
-            INuiSensor * This,
-            /* [in] */ HANDLE hStream,
-            /* [in] */ NUI_IMAGE_FRAME *pImageFrame);
-        
-        HRESULT ( __stdcall *NuiImageGetColorPixelCoordinatesFromDepthPixel )( 
-            INuiSensor * This,
-            /* [in] */ NUI_IMAGE_RESOLUTION eColorResolution,
-            /* [in] */ const NUI_IMAGE_VIEW_AREA *pcViewArea,
-            /* [in] */ LONG lDepthX,
-            /* [in] */ LONG lDepthY,
-            /* [in] */ USHORT usDepthValue,
-            /* [out] */ LONG *plColorX,
-            /* [out] */ LONG *plColorY);
-        
-        HRESULT ( __stdcall *NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution )( 
-            INuiSensor * This,
-            /* [in] */ NUI_IMAGE_RESOLUTION eColorResolution,
-            /* [in] */ NUI_IMAGE_RESOLUTION eDepthResolution,
-            /* [in] */ const NUI_IMAGE_VIEW_AREA *pcViewArea,
-            /* [in] */ LONG lDepthX,
-            /* [in] */ LONG lDepthY,
-            /* [in] */ USHORT usDepthValue,
-            /* [out] */ LONG *plColorX,
-            /* [out] */ LONG *plColorY);
-        
-        HRESULT ( __stdcall *NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution )( 
-            INuiSensor * This,
-            /* [in] */ NUI_IMAGE_RESOLUTION eColorResolution,
-            /* [in] */ NUI_IMAGE_RESOLUTION eDepthResolution,
-            /* [in] */ DWORD cDepthValues,
-            /* [size_is][in] */ USHORT *pDepthValues,
-            /* [in] */ DWORD cColorCoordinates,
-            /* [size_is][out][in] */ LONG *pColorCoordinates);
-        
-        HRESULT ( __stdcall *NuiCameraElevationSetAngle )( 
-            INuiSensor * This,
-            /* [in] */ LONG lAngleDegrees);
-        
-        HRESULT ( __stdcall *NuiCameraElevationGetAngle )( 
-            INuiSensor * This,
-            /* [retval][out] */ LONG *plAngleDegrees);
-        
-        HRESULT ( __stdcall *NuiSkeletonTrackingEnable )( 
-            INuiSensor * This,
-            /* [in] */ HANDLE hNextFrameEvent,
-            /* [in] */ DWORD dwFlags);
-        
-        HRESULT ( __stdcall *NuiSkeletonTrackingDisable )( 
-            INuiSensor * This);
-        
-        HRESULT ( __stdcall *NuiSkeletonSetTrackedSkeletons )( 
-            INuiSensor * This,
-            /* [size_is][in] */ DWORD *TrackingIDs);
-        
-        HRESULT ( __stdcall *NuiSkeletonGetNextFrame )( 
-            INuiSensor * This,
-            /* [in] */ DWORD dwMillisecondsToWait,
-            /* [out][in] */ NUI_SKELETON_FRAME *pSkeletonFrame);
-        
-        HRESULT ( __stdcall *NuiTransformSmooth )( 
-            INuiSensor * This,
-            NUI_SKELETON_FRAME *pSkeletonFrame,
-            const NUI_TRANSFORM_SMOOTH_PARAMETERS *pSmoothingParams);
-        
-        /* [helpstring] */ HRESULT ( __stdcall *NuiGetAudioSource )( 
-            INuiSensor * This,
-            /* [out] */ INuiAudioBeam **ppDmo);
-        
-        int ( __stdcall *NuiInstanceIndex )( 
-            INuiSensor * This);
-        
-        BSTR ( __stdcall *NuiDeviceConnectionId )( 
-            INuiSensor * This);
-        
-        BSTR ( __stdcall *NuiUniqueId )( 
-            INuiSensor * This);
-        
-        BSTR ( __stdcall *NuiAudioArrayId )( 
-            INuiSensor * This);
-        
-        HRESULT ( __stdcall *NuiStatus )( 
-            INuiSensor * This);
-        
-        DWORD ( __stdcall *NuiInitializationFlags )( 
-            INuiSensor * This);
-        
-        HRESULT ( __stdcall *NuiGetCoordinateMapper )( 
-            INuiSensor * This,
-            /* [retval][out] */ INuiCoordinateMapper **pMapping);
-        
-        HRESULT ( __stdcall *NuiImageFrameGetDepthImagePixelFrameTexture )( 
-            INuiSensor * This,
-            /* [in] */ HANDLE hStream,
-            /* [in] */ NUI_IMAGE_FRAME *pImageFrame,
-            /* [out] */ BOOL *pNearMode,
-            /* [out] */ INuiFrameTexture **ppFrameTexture);
-        
-        HRESULT ( __stdcall *NuiGetColorCameraSettings )( 
-            INuiSensor * This,
-            /* [retval][out] */ INuiColorCameraSettings **pCameraSettings);
-        
-        BOOL ( __stdcall *NuiGetForceInfraredEmitterOff )( 
-            INuiSensor * This);
-        
-        HRESULT ( __stdcall *NuiSetForceInfraredEmitterOff )( 
-            INuiSensor * This,
-            /* [in] */ BOOL fForceInfraredEmitterOff);
-        
-        HRESULT ( __stdcall *NuiAccelerometerGetCurrentReading )( 
-            INuiSensor * This,
-            /* [retval][out] */ Vector4 *pReading);
-        
-        HRESULT ( __stdcall *NuiSetDepthFilter )( 
-            INuiSensor * This,
-            /* [in] */ INuiDepthFilter *pDepthFilter);
-        
-        HRESULT ( __stdcall *NuiGetDepthFilter )( 
-            INuiSensor * This,
-            /* [retval][out] */ INuiDepthFilter **ppDepthFilter);
-        
-        HRESULT ( __stdcall *NuiGetDepthFilterForTimeStamp )( 
-            INuiSensor * This,
-            /* [in] */ LARGE_INTEGER liTimeStamp,
-            /* [retval][out] */ INuiDepthFilter **ppDepthFilter);
-        
-        END_INTERFACE
-    } INuiSensorVtbl;
-
-    interface INuiSensor
-    {
-        CONST_VTBL struct INuiSensorVtbl *lpVtbl;
-    };
-]]
---]==]
-
-ffi.cdef[[
-typedef struct INuiCoordinateMapper INuiCoordinateMapper;
-]]
-
-ffi.cdef[[
-typedef void (__stdcall * NuiStatusProc)( HRESULT hrStatus, const OLECHAR* instanceName, const OLECHAR* uniqueDeviceName, void* pUserData );
-]]
-
-ffi.cdef[[
-  HRESULT NuiCameraElevationGetAngle(LONG * plAngleDegrees);
-
-  HRESULT NuiCameraElevationSetAngle(LONG lAngleDegrees);
-
-/*
-  HRESULT NuiCreateCoordinateMapperFromParameters(
-                ULONG dataByteCount, 
-                void* pData,
-                _Out_ INuiCoordinateMapper **ppCoordinateMapper);
-*/
-
-  //NuiCreateDepthFilter = NuiLib.NuiCreateDepthFilter,
-  //HRESULT NuiCreateSensorById(const OLECHAR *strInstanceId, INuiSensor ** ppNuiSensor );
-
-  //NuiCreateSensorByIndex = NuiLib.NuiCreateSensorByIndex,
-  //HRESULT NuiGetAudioSource(INuiAudioBeam ** ppDmo );
-
-  HRESULT NuiGetSensorCount(int * pCount );
-
-  HRESULT NuiImageGetColorPixelCoordinatesFromDepthPixel(
-    NUI_IMAGE_RESOLUTION eColorResolution,
-    const NUI_IMAGE_VIEW_AREA *pcViewArea,
-    LONG   lDepthX,
-    LONG   lDepthY,
-    USHORT usDepthValue,
-    LONG *plColorX,
-    LONG *plColorY);
-
-  //NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution = NuiLib.NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution,
-  //NuiImageStreamGetImageFrameFlags = NuiLib.NuiImageStreamGetImageFrameFlags,
-
-  HRESULT NuiImageStreamGetNextFrame(
-    HANDLE hStream,
-    DWORD dwMillisecondsToWait,
-    const NUI_IMAGE_FRAME **ppcImageFrame);
-
-  HRESULT NuiImageStreamOpen(
-    NUI_IMAGE_TYPE eImageType,
-    NUI_IMAGE_RESOLUTION eResolution,
-    DWORD dwImageFrameFlags,
-    DWORD dwFrameLimit,
-    HANDLE hNextFrameEvent,
-    HANDLE *phStreamHandle);
-
-  HRESULT NuiImageStreamReleaseFrame(
-    HANDLE hStream,
-    const NUI_IMAGE_FRAME *pImageFrame);
-
-  HRESULT NuiImageStreamSetImageFrameFlags(
-    HANDLE hStream,
-    DWORD dwImageFrameFlags);
-  
-  HRESULT NuiInitialize(DWORD dwFlags);
-  
-  void NuiSetDeviceStatusCallback( NuiStatusProc callback, void* pUserData );
-
-  HRESULT NuiSetFrameEndEvent(
-    HANDLE hEvent,
-    DWORD dwFrameEventFlag);
-
-  void NuiShutdown();
 ]]
 
 -- Skeleton routines
@@ -488,6 +253,312 @@ typedef struct _NUI_TRANSFORM_SMOOTH_PARAMETERS
 
 ]]
 
+-- {8c3cebfa-a35d-497e-bc9a-e9752a8155e0}
+IID_INuiAudioBeam = DEFINE_UUID("IID_INuiAudioBeam", 0x8c3cebfa, 0xa35d, 0x497e, 0xbc, 0x9a, 0xe9, 0x75, 0x2a, 0x81, 0x55, 0xe0);
+
+ffi.cdef[[
+  typedef struct INuiAudioBeam INuiAudioBeam;
+
+    typedef struct INuiAudioBeamVtbl
+    {
+        HRESULT (  *QueryInterface )(
+            INuiAudioBeam * This,
+            REFIID riid,
+            void **ppvObject);
+
+        ULONG (  *AddRef )(INuiAudioBeam * This);
+        ULONG (  *Release )(INuiAudioBeam * This);
+
+
+        HRESULT (  *GetBeam )(INuiAudioBeam * This,
+           double *angle);
+
+        HRESULT (  *SetBeam )(
+            INuiAudioBeam * This,
+            double angle);
+
+        HRESULT (  *GetPosition )(
+            INuiAudioBeam * This,
+            double *angle,
+            double *confidence);
+
+    } INuiAudioBeamVtbl;
+
+    typedef struct INuiAudioBeam
+    {
+        const INuiAudioBeamVtbl *lpVtbl;
+    }INuiAudioBeam;
+]]
+
+--[=[
+ffi.cdef[[
+    typedef struct INuiSensor INuiSensor;
+
+    typedef struct INuiSensorVtbl
+    {
+        
+        HRESULT ( __stdcall *QueryInterface )( 
+            INuiSensor * This,
+            REFIID riid,
+            /* [annotation][iid_is][out] */ 
+             void **ppvObject);
+        
+        ULONG ( __stdcall *AddRef )( 
+            INuiSensor * This);
+        
+        ULONG ( __stdcall *Release )( 
+            INuiSensor * This);
+        
+        HRESULT ( __stdcall *NuiInitialize )( 
+            INuiSensor * This,
+            DWORD dwFlags);
+        
+        void ( __stdcall *NuiShutdown )( 
+            INuiSensor * This);
+        
+        HRESULT ( __stdcall *NuiSetFrameEndEvent )( 
+            INuiSensor * This,
+            HANDLE hEvent,
+            DWORD dwFrameEventFlag);
+        
+        HRESULT ( __stdcall *NuiImageStreamOpen )( 
+            INuiSensor * This,
+            NUI_IMAGE_TYPE eImageType,
+            NUI_IMAGE_RESOLUTION eResolution,
+            DWORD dwImageFrameFlags,
+            DWORD dwFrameLimit,
+            HANDLE hNextFrameEvent,
+            HANDLE *phStreamHandle);
+        
+        HRESULT ( __stdcall *NuiImageStreamSetImageFrameFlags )( 
+            INuiSensor * This,
+            HANDLE hStream,
+            DWORD dwImageFrameFlags);
+        
+        HRESULT ( __stdcall *NuiImageStreamGetImageFrameFlags )( 
+            INuiSensor * This,
+            HANDLE hStream,
+            DWORD *pdwImageFrameFlags);
+        
+        HRESULT ( __stdcall *NuiImageStreamGetNextFrame )( 
+            INuiSensor * This,
+            HANDLE hStream,
+            DWORD dwMillisecondsToWait,
+            NUI_IMAGE_FRAME *pImageFrame);
+        
+        HRESULT ( __stdcall *NuiImageStreamReleaseFrame )( 
+            INuiSensor * This,
+            HANDLE hStream,
+            NUI_IMAGE_FRAME *pImageFrame);
+        
+        HRESULT ( __stdcall *NuiImageGetColorPixelCoordinatesFromDepthPixel )( 
+            INuiSensor * This,
+            NUI_IMAGE_RESOLUTION eColorResolution,
+            const NUI_IMAGE_VIEW_AREA *pcViewArea,
+            LONG lDepthX,
+            LONG lDepthY,
+            USHORT usDepthValue,
+            LONG *plColorX,
+            LONG *plColorY);
+        
+        HRESULT ( __stdcall *NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution )( 
+            INuiSensor * This,
+            NUI_IMAGE_RESOLUTION eColorResolution,
+            NUI_IMAGE_RESOLUTION eDepthResolution,
+            const NUI_IMAGE_VIEW_AREA *pcViewArea,
+            LONG lDepthX,
+            LONG lDepthY,
+            USHORT usDepthValue,
+            LONG *plColorX,
+            LONG *plColorY);
+        
+        HRESULT ( __stdcall *NuiImageGetColorPixelCoordinateFrameFromDepthPixelFrameAtResolution )( 
+            INuiSensor * This,
+            NUI_IMAGE_RESOLUTION eColorResolution,
+            NUI_IMAGE_RESOLUTION eDepthResolution,
+            DWORD cDepthValues,
+            USHORT *pDepthValues,
+            DWORD cColorCoordinates,
+            LONG *pColorCoordinates);
+        
+        HRESULT ( __stdcall *NuiCameraElevationSetAngle )( 
+            INuiSensor * This,
+            LONG lAngleDegrees);
+        
+        HRESULT ( __stdcall *NuiCameraElevationGetAngle )( 
+            INuiSensor * This,
+            LONG *plAngleDegrees);
+        
+        HRESULT ( __stdcall *NuiSkeletonTrackingEnable )( 
+            INuiSensor * This,
+            HANDLE hNextFrameEvent,
+            DWORD dwFlags);
+        
+        HRESULT ( __stdcall *NuiSkeletonTrackingDisable )( 
+            INuiSensor * This);
+        
+        HRESULT ( __stdcall *NuiSkeletonSetTrackedSkeletons )( 
+            INuiSensor * This,
+            DWORD *TrackingIDs);
+        
+        HRESULT ( __stdcall *NuiSkeletonGetNextFrame )( 
+            INuiSensor * This,
+            DWORD dwMillisecondsToWait,
+            NUI_SKELETON_FRAME *pSkeletonFrame);
+        
+        HRESULT ( __stdcall *NuiTransformSmooth )( 
+            INuiSensor * This,
+            NUI_SKELETON_FRAME *pSkeletonFrame,
+            const NUI_TRANSFORM_SMOOTH_PARAMETERS *pSmoothingParams);
+        
+        HRESULT ( __stdcall *NuiGetAudioSource )( 
+            INuiSensor * This,
+            INuiAudioBeam **ppDmo);
+        
+        int ( __stdcall *NuiInstanceIndex )( 
+            INuiSensor * This);
+        
+        BSTR ( __stdcall *NuiDeviceConnectionId )( 
+            INuiSensor * This);
+        
+        BSTR ( __stdcall *NuiUniqueId )( 
+            INuiSensor * This);
+        
+        BSTR ( __stdcall *NuiAudioArrayId )( 
+            INuiSensor * This);
+        
+        HRESULT ( __stdcall *NuiStatus )( 
+            INuiSensor * This);
+        
+        DWORD ( __stdcall *NuiInitializationFlags )( 
+            INuiSensor * This);
+        
+        HRESULT ( __stdcall *NuiGetCoordinateMapper )( 
+            INuiSensor * This,
+            INuiCoordinateMapper **pMapping);
+        
+        HRESULT ( __stdcall *NuiImageFrameGetDepthImagePixelFrameTexture )( 
+            INuiSensor * This,
+            HANDLE hStream,
+            NUI_IMAGE_FRAME *pImageFrame,
+            BOOL *pNearMode,
+            INuiFrameTexture **ppFrameTexture);
+        
+        HRESULT ( __stdcall *NuiGetColorCameraSettings )( 
+            INuiSensor * This,
+            INuiColorCameraSettings **pCameraSettings);
+        
+        BOOL ( __stdcall *NuiGetForceInfraredEmitterOff )( 
+            INuiSensor * This);
+        
+        HRESULT ( __stdcall *NuiSetForceInfraredEmitterOff )( 
+            INuiSensor * This,
+            BOOL fForceInfraredEmitterOff);
+        
+        HRESULT ( __stdcall *NuiAccelerometerGetCurrentReading )( 
+            INuiSensor * This,
+            Vector4 *pReading);
+        
+        HRESULT ( __stdcall *NuiSetDepthFilter )( 
+            INuiSensor * This,
+            INuiDepthFilter *pDepthFilter);
+        
+        HRESULT ( __stdcall *NuiGetDepthFilter )( 
+            INuiSensor * This,
+            INuiDepthFilter **ppDepthFilter);
+        
+        HRESULT ( __stdcall *NuiGetDepthFilterForTimeStamp )( 
+            INuiSensor * This,
+            LARGE_INTEGER liTimeStamp,
+            INuiDepthFilter **ppDepthFilter);
+        
+    } INuiSensorVtbl;
+
+    typedef struct INuiSensor
+    {
+        const struct INuiSensorVtbl *lpVtbl;
+<<<<<<< HEAD
+    };
+=======
+    }INuiSensor;
+>>>>>>> 6b9b97a640a85ab28f150fc70006b9225c9c72aa
+]]
+--]=]
+
+ffi.cdef[[
+typedef struct INuiCoordinateMapper INuiCoordinateMapper;
+]]
+
+ffi.cdef[[
+typedef void (__stdcall * NuiStatusProc)( HRESULT hrStatus, const OLECHAR* instanceName, const OLECHAR* uniqueDeviceName, void* pUserData );
+]]
+
+ffi.cdef[[
+  HRESULT NuiCameraElevationGetAngle(LONG * plAngleDegrees);
+
+  HRESULT NuiCameraElevationSetAngle(LONG lAngleDegrees);
+
+/*
+  HRESULT NuiCreateCoordinateMapperFromParameters(
+                ULONG dataByteCount, 
+                void* pData,
+                INuiCoordinateMapper **ppCoordinateMapper);
+*/
+
+  //NuiCreateDepthFilter = NuiLib.NuiCreateDepthFilter,
+  //HRESULT NuiCreateSensorById(const OLECHAR *strInstanceId, INuiSensor ** ppNuiSensor );
+
+  //NuiCreateSensorByIndex = NuiLib.NuiCreateSensorByIndex,
+  //HRESULT NuiGetAudioSource(INuiAudioBeam ** ppDmo );
+
+  HRESULT NuiGetSensorCount(int * pCount );
+
+  HRESULT NuiImageGetColorPixelCoordinatesFromDepthPixel(
+    NUI_IMAGE_RESOLUTION eColorResolution,
+    const NUI_IMAGE_VIEW_AREA *pcViewArea,
+    LONG   lDepthX,
+    LONG   lDepthY,
+    USHORT usDepthValue,
+    LONG *plColorX,
+    LONG *plColorY);
+
+  //NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution = NuiLib.NuiImageGetColorPixelCoordinatesFromDepthPixelAtResolution,
+  //NuiImageStreamGetImageFrameFlags = NuiLib.NuiImageStreamGetImageFrameFlags,
+
+  HRESULT NuiImageStreamGetNextFrame(
+    HANDLE hStream,
+    DWORD dwMillisecondsToWait,
+    const NUI_IMAGE_FRAME **ppcImageFrame);
+
+  HRESULT NuiImageStreamOpen(
+    NUI_IMAGE_TYPE eImageType,
+    NUI_IMAGE_RESOLUTION eResolution,
+    DWORD dwImageFrameFlags,
+    DWORD dwFrameLimit,
+    HANDLE hNextFrameEvent,
+    HANDLE *phStreamHandle);
+
+  HRESULT NuiImageStreamReleaseFrame(
+    HANDLE hStream,
+    const NUI_IMAGE_FRAME *pImageFrame);
+
+  HRESULT NuiImageStreamSetImageFrameFlags(
+    HANDLE hStream,
+    DWORD dwImageFrameFlags);
+  
+  
+  void NuiSetDeviceStatusCallback( NuiStatusProc callback, void* pUserData );
+
+  HRESULT NuiSetFrameEndEvent(
+    HANDLE hEvent,
+    DWORD dwFrameEventFlag);
+
+]]
+
+
+
+print("NuiLib: ", NuiLib)
+print("NuiLib.NuiGetSensorCount: ", NuiLib["NuiGetSensorCount"]);
 
 
 
@@ -500,14 +571,6 @@ local __HRESULT_FROM_WIN32 = function(x)
 end
 
 return {
-  NUI_INITIALIZE_FLAG_USES_AUDIO                =  0x10000000,
-  NUI_INITIALIZE_FLAG_USES_DEPTH_AND_PLAYER_INDEX =0x00000001,
-  NUI_INITIALIZE_FLAG_USES_COLOR                  =0x00000002,
-  NUI_INITIALIZE_FLAG_USES_SKELETON               =0x00000008,  
-  NUI_INITIALIZE_FLAG_USES_DEPTH                  =0x00000020,
-  NUI_INITIALIZE_FLAG_USES_HIGH_QUALITY_COLOR     =0x00000040,  -- implies COLOR stream will be from uncompressed YUY2 @ 15fps
-
-  NUI_INITIALIZE_DEFAULT_HARDWARE_THREAD          =0xFFFFFFFF,
 
 
   NUI_CAMERA_ELEVATION_MAXIMUM  = 27,

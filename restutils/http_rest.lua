@@ -2,9 +2,9 @@
 local StopWatch = require("StopWatch");
 local Collections = require ("Collections");
 
+local Application = require("Application");
+local NetStream = require("NetStream");
 local FileStream = require ("FileStream");
-local IOProcessor = require("IOProcessor");
-local IOCPNetStream = require("IOCPNetStream");
 
 local URL = require ("url");
 local WebRequest = require ("WebRequest");
@@ -29,7 +29,7 @@ print("http_get: ", resource, showheaders, onfinish)
 	print("URL: ", hostname, port, path);
 
 	-- Open up a stream to get the real content
-	local resourcestream, err = IOCPNetStream:create(hostname, port)
+	local resourcestream, err = NetStream:connect(hostname, port)
 
 	if not resourcestream then
 		return onfinish(nil, err)
