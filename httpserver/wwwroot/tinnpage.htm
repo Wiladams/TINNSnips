@@ -1,0 +1,34 @@
+<html>
+	<head><title>TINN</title></head>
+	<body>
+		<h1>TINN</h1><p>
+<a href="http://github.com/wiladams/tinn">TINN</a> is a multi tool targeted to creating various types of applications running in the Windows environment.  The original impetus for TINN was to create a tool which had the networking capabilities of node.js, but did not rely on libraries such as libuv, openssl, or the V8 engine.  TINN's native language is Lua.  The tinn.exe executable embeds a luajit runtime, and provides LuaJIT ffi interfaces to many thousands of Windows API calls.<p>
+
+<strong>Key Features</strong><p>
+
+<strong>Core OS API Sets</strong> - As of Windows 7, the Windows environment has separated various core functions into smaller libraries which are more efficiently loaded compared to the larger monolithic libraries of the past.  TINN provides access to the libraries through LuaJIT ffi wrappers.  If all a developer requires is the ability to get at core system functions using scripts, they might just use these core API interop interfaces.<p>
+
+<strong>Core OS API Objects</strong> - The lowest level API wrappers provide access, but they do nothing to make it easier to access these APIs.  TINN provides a set of objects and helper functions which wrap the core APIs making them more consistent and approachable to a Lua programmer.  Some examples include standardizing API calls such that they all return a 'true/false' success indication, along with error messages where appropriate.  Similarly, in many places where enumeration might occur (such as enumerating all the windows on a desktop), TINN provides standard Lua iterators.  This not only gives access to the low level functions of the OS, but makes them readily accessible to the Lua developer in a meaningful and natural way.<p>
+
+<strong>Multi-Tasking</strong> - The Lua language supports the concept of 'co-routines'.  Co-routines are a mechanism by which the language can have 'light weight threads'.  They represent a way of doing cooperative multi-tasking.  The developer is responsible for occasionally calling "yield()", in order to give up a slice of time to other tasks that may be operating.  Without explicitly calling "yield()" though, multi-tasking will occur automatically if the developer makes any calls to routines that would suspend the thread, such as 'sleep()' or various IO routines.<p>
+
+<strong>Async IO</strong> - TINN uses IO Completion Ports on Windows for the fastest most efficient IO processing that Windows has to offer.  This is baked in at the lowest level such that the programmer doesn't need to think about it.  Developers just write their code as they normally would, in what appears to be a sequential manner.  The async nature of dispatching IO requests, and subsequently waiting on their completion is totally handled by TINN.  IO Completion ports are used for networking sockets, as well as anything within Windows that uses a file handle, such as files, serial ports, console, etc.<p>
+
+<strong>Installation</strong><p>
+
+You can find the latest release of <a href="https://github.com/Wiladams/TINN/releases">TINN  here</a>.   It is provided in a .zip file for easy installation.  It does not require any external libraries, does not make any changes to the system registry, can run from a thumb drive.  Just copy the .zip, unpack the tinn.exe file from there, and run it from the command line.  Best is to put the tinn.exe on your executable path so that it can easily be executed from anywhere.<p>
+
+<strong>Examples</strong>
+
+The best way to explore TINN is to look at some of the many examples in the <a href="https://github.com/Wiladams/TINN/tree/master/tests">test cases</a> of the TINN project.  As TINN is a command line tool, the easiest way to explore is to bring up a command prompt, and type: tinn &lt;filename.lua&gt;<p>
+
+TINN also supports an interactive REPL environment:<p>
+
+<code>
+c> tinn.exe
+>
+</code>
+
+Ctrl-C will exit the interactive session.
+	</body>
+</html>
