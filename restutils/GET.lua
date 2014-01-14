@@ -12,7 +12,7 @@ local main = function()
 		stop();
 	end
 
-	spawn(REST.GET, url, showheaders, onfinish);
+	REST.GET(url, showheaders, onfinish);
 end
 
 run(main);
