@@ -16,9 +16,6 @@ local sw = Stopwatch();
 
 local animites = {}
 
-local bbfr = nil
-local ctxt = nil
-local winctxt = nil
 
 -- The routine that gets called for any
 -- mouse activity messages
@@ -30,14 +27,12 @@ function keyboardinteraction(msg, wparam, lparam)
 	print(string.format("Keyboard: 0x%x", msg))
 end
 
-<<<<<<< HEAD
 function oncreated(win)
-	winctxt = win.GDIContext
+	print("Window Created")
+end
 
-	bbfr = win:getBackBuffer()
-	ctxt, err = bbfr:getDeviceContext();
-=======
 local tickCount = 0;
+
 function ontick(win)
 	tickCount = tickCount + 1;
 --print("ONTICK")
@@ -47,21 +42,10 @@ function ontick(win)
 	local bbfr = win:getBackBuffer()
 	local ctxt, err = bbfr:getDeviceContext();
 	--local ctxt = winctxt;
->>>>>>> 6b9b97a640a85ab28f150fc70006b9225c9c72aa
 
 	-- Make sure we're using DC Brush and pen to start
 	ctxt:UseDCBrush(true);
 	ctxt:UseDCPen(true);
-end
-
-function onquit(win)
-	print("ON QUIT!")
-	
-	return true;
-end
-
-function ontick(win, tickCount)
---print("ONTICK")
 	
 	local sangle = ceil(abs(sin(rad(tickCount % 360)))*255)
 	--print(sangle)
@@ -91,6 +75,11 @@ function ontick(win, tickCount)
 end
 
 
+function onquit(win)
+	print("ON QUIT!")
+	
+	return true;
+end
 
 
 
@@ -99,11 +88,6 @@ local win = GDIWindow({
 		Title = "Bouncers",
 		--KeyboardInteractor = keyboardinteraction,
 		--MouseInteractor = mouseinteraction,
-<<<<<<< HEAD
-		FrameRate = 60,
-		OnCreatedDelegate = oncreated,
-=======
->>>>>>> 6b9b97a640a85ab28f150fc70006b9225c9c72aa
 		OnTickDelegate = ontick,
 		OnQuitDelegate = onquit,
 		Extent = {1024,768},
