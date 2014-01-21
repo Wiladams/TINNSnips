@@ -35,6 +35,10 @@ local ResourceMap = {
 	};
 
 
+	["/drives"]				= {name="/drives",
+		GET 				= HandleFileSystem.HandleDrivesGET,
+	};
+
 	["/files"] 				= {name="/files",
 		GET					= HandleFileSystem.HandleFilesGET,
 	};

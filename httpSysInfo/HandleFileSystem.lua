@@ -1,10 +1,12 @@
 -- /files
+local ffi = require("ffi")
 local FileSystem = require("FileSystem");
 local wfs = FileSystem("c:");
 local FileService = require("FileService");
 local URL = require("url")
 local pages = require("pages")
-
+local iterators = require("iterators")
+local core_file = require("core_file_l1_2_0");
 
 local AceTemplate = [[
 <!DOCTYPE html>
@@ -243,6 +245,27 @@ print("SEARCH: ", searchPath);
 
 end
 
+local function HandleDrivesGET(request, response)
+    local nBufferLength = 255;
+    local lpBuffer = ffi.new("wchar_t[256]");
+
+    local res = core_file.GetLogicalDriveStringsW(nBufferLength, lpBuffer)
+
+    local body = {}
+    table.insert(body, "<html><head><title>Drives</title></head>");
+    table.insert(body, "<body><h2>Drives</h2>\n");
+    table.insert(body, "<ul>\n");
+    for name in iterators.wstrziter(lpBuffer, nBufferLength) do
+    end
+    table.insert(body, "</ul>")
+
+    local headers = {["Content-Type"] = "text/html"}
+    
+    response:writeHead(200, headers)
+    response:writeEnd(table.concat(body))
+end
+
 return {
+    HandleDrivesGET = HandleDrivesGET,
     HandleFilesGET = HandleFilesGET,
 }
