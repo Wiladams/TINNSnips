@@ -571,7 +571,7 @@ local __HRESULT_FROM_WIN32 = function(x)
 end
 
 return {
-
+    Lib = NuiLib,
 
   NUI_CAMERA_ELEVATION_MAXIMUM  = 27,
   NUI_CAMERA_ELEVATION_MINIMUM  = (-27),

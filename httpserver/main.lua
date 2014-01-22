@@ -23,12 +23,12 @@ local port = arg[1] or 8080
 
 local Mapper = ResourceMapper(resourceMap);
 local Logfile = require("Logfile")
+local Server = nil;
 
-local obj = {}
 --local logger = Logfile("requests.log")
 
 
-local OnRequest = function(param, request, response)
+local OnRequest = function(request, response)
 	local handler, err = Mapper:getHandler(request)
 
 	--logger:writeString(string.format("Date: %s\t%s\t%s\r\n", os.date("%c"), request.Method, request.Resource));
@@ -37,7 +37,7 @@ local OnRequest = function(param, request, response)
 	-- it will do it, by returning 'true'
 	if handler then
 		if not handler(request, response) then
-			param.Server:HandleRequestFinished(request);
+			Server:HandleRequestFinished(request);
 		end
 	else
 		print("NO HANDLER: ", request.Url.path);
@@ -47,11 +47,11 @@ local OnRequest = function(param, request, response)
 
 		-- recylce the request in case the socket
 		-- is still open
-		param.Server:HandleRequestFinished(request);
+		Server:HandleRequestFinished(request);
 	end
 
 end
 
 
-obj.Server = HttpServer(port, OnRequest, obj);
-obj.Server:run()
+Server = HttpServer(port, OnRequest);
+Server:run()

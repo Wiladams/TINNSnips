@@ -1,5 +1,9 @@
 local handlers = require "ResourceHandlers"
 local HandleFileSystem = require("HandleFileSystem")
+local Processes = require("Processes")
+local OSProcess = require("OSProcess")
+
+
 Runtime = require("Runtime")
 
 
@@ -48,11 +52,11 @@ local ResourceMap = {
 	};
 
 	["/processes"] 			= {name="/processes",
-		GET					= handlers.HandleProcessesGET,
+		GET					= Processes.HandleProcessesGET,
 	};
 
 	["/processes/data"] 			= {name="/processes/data",
-		GET					= handlers.HandleProcessesGETData,
+		GET					= Processes.HandleProcessesGETData,
 	};
 
 	["/services"] 			= {name="/services",
