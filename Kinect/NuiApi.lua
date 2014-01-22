@@ -1,10 +1,11 @@
 local ffi = require("ffi")
-local WTypes = require("WTypes")
-local WinError = require("win_error")
 local bit = require("bit")
 local bor = bit.bor;
 local band = bit.band;
 local lshift = bit.lshift;
+
+local WTypes = require("WTypes")
+local WinError = require("win_error")
 
 
 ffi.cdef[[
@@ -95,6 +96,8 @@ ffi.cdef[[
 local Lib = ffi.load("kinect10")
 
 return {
+	Lib = Lib,
+
 	NuiInitialize = Lib.NuiInitialize,
 	NuiShutdown = Lib.NuiShutdown,
 }

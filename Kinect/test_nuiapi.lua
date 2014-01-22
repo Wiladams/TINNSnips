@@ -1,14 +1,12 @@
 -- test_nuiapi.lua
 local ffi = require("ffi")
 local NuiApi = require("NuiApi")
-local Application = require("Application")
+--local Application = require("Application")
 
 
-local app = Application(true);
+local hr = NuiApi.NuiInitialize(ffi.C.NUI_INITIALIZE_FLAG_USES_COLOR);
 
-
-
-
+--[=[
 local function main()
 	local hr = NuiApi.NuiInitialize(ffi.C.NUI_INITIALIZE_FLAG_USES_COLOR);
 
@@ -31,3 +29,4 @@ end
 
 --main();
 run(main)
+--]=]
