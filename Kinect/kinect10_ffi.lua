@@ -557,8 +557,6 @@ ffi.cdef[[
 
 
 
-print("NuiLib: ", NuiLib)
-print("NuiLib.NuiGetSensorCount: ", NuiLib["NuiGetSensorCount"]);
 
 
 

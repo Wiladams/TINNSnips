@@ -1,13 +1,16 @@
 
 local ffi = require("ffi")
-local kinect = require("kinect10_ffi")
-local SecError = require("SecError")
+local NuiApi = require("NuiApi")
+local NuiImageStream = require("NuiImageStream")
+local Application = require("Application")
+local WinError = require("win_error")
+
 
 local getSensorCount = function()
 	-- See how many sensors exist
 	local pCount = ffi.new("int[1]");
 
-	local res = kinect.NuiGetSensorCount(pCount);
+	local res = NuiApi.NuiGetSensorCount(pCount);
 	
 	if res ~= 0 then
 		return false, res
@@ -16,46 +19,44 @@ local getSensorCount = function()
 	return pCount[0]
 end
 
+local function loop(imgstream)
+	while true do
+		local frame, err = imgstream:getNextFrame(1000/15);
+		if frame then
+			print("Frame: ", frame)
+			frame:release();
+		else
+			if err then
+				print(HRESULT_PARTS(err))
+			end
+		end
+		collectgarbage();
+	end
+end
 
-local getImageStream = function(eImageType, eResolution)
-	eImageType = eImageType or ffi.C.NUI_IMAGE_TYPE_COLOR;
-	eResolution = eResolution or ffi.C.NUI_IMAGE_RESOLUTION_640x480;
-	local dwImageFrameFlags = 0;
-	local dwFrameLimit = 2;
-	local hNextFrameEvent = nil;
-	local phStreamHandle = ffi.new("HANDLE [1]")
-	
-	local hr = kinect.NuiImageStreamOpen(
-    	eImageType,
-    	eResolution,
-    	dwImageFrameFlags,
-    	dwFrameLimit,
-    	hNextFrameEvent,
-    	phStreamHandle);
-
-	local severity, facility, code = HRESULT_PARTS(hr)
-
-print("ERRORS: ", severity, facility, code)
-
+local function main()
+	local hr = NuiApi.NuiInitialize(ffi.C.NUI_INITIALIZE_FLAG_USES_COLOR);
 	if hr ~= 0 then
-		return false, hr;
+		print("Initialization ERROR: ", hr)
+		return false;
 	end
 
-	return phStreamHandle[0];
+	local nSensors, err = getSensorCount();
+
+	print("Sensor Count: ", nSensors, err)
+
+	if nSensors < 1 then
+		print("NO SENSORS")
+		return false
+	end
+
+	local strm, err = NuiImageStream();
+
+	if err then
+		print(HRESULT_PARTS(hr))
+	end
+
+	coop(loop, strm)
 end
 
-
-
-local nSensors, err = getSensorCount();
-
-print("Sensor Count: ", nSensors, err)
-
-if nSensors < 1 then
-	print("NO SENSORS")
-	return false
-end
-
-local strm, err = getImageStream()
-
-
-print("strm, err: ", strm, err)
+run(main)
