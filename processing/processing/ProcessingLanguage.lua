@@ -1,5 +1,5 @@
 
-local Color = require("Color")
+local Color = require("processing.Color")
 
 --[==================================================[
 		LANGUAGE COMMANDS

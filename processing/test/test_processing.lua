@@ -1,4 +1,6 @@
-local Processing = require("Processing")
+package.path = "../?.lua;"..package.path;
+
+local Processing = require("processing.Processing")
 
 function setup()
 	print("SETUP")

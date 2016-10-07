@@ -5,10 +5,10 @@
 --]]
 
 --local Application = require("Application")
-local GDIWindow = require("GDIWindow")
-local RendererGdi = require("RendererGdi")
-local Language = require("ProcessingLanguage")
 local Functor = require("Functor")
+local GDIWindow = require("GDIWindow")
+local RendererGdi = require("processing.RendererGdi")
+local Language = require("processing.ProcessingLanguage")
 
 -- Constants for Processing Environment
 HALF_PI = math.pi / 2

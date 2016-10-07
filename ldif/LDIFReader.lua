@@ -12,10 +12,11 @@ local R = lpeg.R;
 
 local SPACE = P' ';
 local FILL = SPACE^1;
-local SEP = CRLF + LF;
 local CR = P'\r';
 local LF = P'\n';
 local CRLF = P'\r\n';
+local SEP = CRLF + LF;
+
 
 local upalpha 			= R("AZ")
 local lowalpha 			= R("az")
