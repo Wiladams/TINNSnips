@@ -1,8 +1,9 @@
+package.path = "../?.lua"
 
 local GDIWindow = require "GDIWindow"
 local StopWatch = require "StopWatch"
-local Animite = require("animite")
-local Behaviors = require("behaviors")
+local Animite = require("gamewindow.animite")
+local Behaviors = require("gamewindow.behaviors")
 
 
 local sw = StopWatch();

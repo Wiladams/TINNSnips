@@ -1,10 +1,13 @@
+package.path = "../?.lua"
 
 local GDIWindow = require "GDIWindow"
 local Stopwatch = require "StopWatch"
-local Animite = require("animite")
-local bouncers = require("bouncers")
 local GDI32 = require("GDI32")
 local Functor = require("Functor")
+
+local Animite = require("gamewindow.animite")
+local bouncers = require("gamewindow.bouncers")
+
 
 local sin = math.sin
 local floor = math.floor

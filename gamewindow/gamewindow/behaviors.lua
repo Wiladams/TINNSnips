@@ -1,4 +1,4 @@
-local animation = require("animation")
+local animation = require("gamewindow.animation")
 local random = math.random
 
 local ellipses = function(constraint)
